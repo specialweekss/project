@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "autoprefixer": "^10.4.19",
+    "element-ui": "^2.15.14"
+  }
+}
