@@ -3,15 +3,14 @@ package com.example.demo.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.demo.Class.Question;
 import com.example.demo.Class.Questionnaire;
-import com.example.demo.Class.Questionnaire_question;
 import com.example.demo.other.Result;
 import com.example.demo.service.QuestionService;
 import com.example.demo.service.QuestionnaireService;
-import com.example.demo.service.Questionnaire_questionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -21,33 +20,37 @@ public class Controller {
     private QuestionnaireService questionnaireService;
     @Autowired
     private QuestionService questionService;
-    @Autowired
-    private Questionnaire_questionService questionnaire_questionService;
 
     @CrossOrigin
     @GetMapping("/List")
     public Result getQuestionnaire() {
         return Result.success(questionnaireService.listAll(),questionnaireService.count());
     }
+    @CrossOrigin
+    @GetMapping("/ListByUser")
+    public Result getQuestionnaireByUser(int userId) {
+        LambdaQueryWrapper<Questionnaire> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Questionnaire::getCreatorId,userId);
+        List<Questionnaire> questionnaireList = questionnaireService.list(queryWrapper);
+        if(!questionnaireList.isEmpty())
+            return Result.success(questionnaireList,questionnaireList.size());
+        else
+            return Result.fail();
+    }
+
     @GetMapping("/ListQuestion")
     public Result getQuestion() {
         return Result.success(questionService.listAll(),questionService.count());
     }
-    @GetMapping("/ListQuestionnaire_question")
-    public Result getQuestionnaire_question() {
-        return Result.success(questionnaire_questionService.listAll(),questionService.count());
-    }
     @GetMapping("/ListQuestionInIt")
-    public Result getQuestionInIt(int questionnaireId) {
-        LambdaQueryWrapper<Questionnaire_question> wrapper = new LambdaQueryWrapper<Questionnaire_question>();
-        wrapper.eq(Questionnaire_question::getQnaireId,questionnaireId);
-        List<Questionnaire_question> list = questionnaire_questionService.list(wrapper);
-        List<Question> questions=new ArrayList<Question>();
-        list.forEach(questionnaire_question -> {
-            Question question = questionService.getById(questionnaire_question.getQuestionId());
-           questions.add(question);
-        });
-        return Result.success(questions, questions.size());
+    public Result getQuestionInIt(int id) {
+        LambdaQueryWrapper<Question> wrapper = new LambdaQueryWrapper<Question>();
+        wrapper.eq(Question::getQuestionnaireId,id);
+        List<Question> list = questionService.list(wrapper);
+        if(!list.isEmpty())
+        return Result.success(list, list.size());
+        else
+            return Result.fail();
     }
 @CrossOrigin
     @PostMapping("/save")
@@ -59,15 +62,13 @@ public class Controller {
     }
     @CrossOrigin
     @PostMapping("/saveQuestion")
-    public Result saveQuestion(int questionnaireId,@RequestBody Question question) {
-        if(questionService.save(question)) {
-            Questionnaire_question questionnaire_question = new Questionnaire_question();
-            questionnaire_question.setQnaireId(questionnaireId);
-            questionnaire_question.setQuestionId(question.getQuestionId());
-         if(questionnaire_questionService.save(questionnaire_question))
-             return Result.success(question);
-         else
-             return Result.fail();
+    public Result saveQuestion(int id,@RequestBody Question question) {
+        Questionnaire questionnaire = questionnaireService.getById(id);
+        question.setNumber(questionnaire.getQuestionNum()+1);
+        questionnaire.setQuestionNum(questionnaire.getQuestionNum()+1);
+        question.setQuestionnaireId(id);
+        if(questionService.save(question)&&questionnaireService.updateById(questionnaire)) {
+                 return Result.success(questionnaire);
         }
         else
             return Result.fail();
@@ -75,29 +76,29 @@ public class Controller {
 
 
     @PostMapping("/mod")
-    public Result mod(@RequestBody Questionnaire questionnaire) {
-        if(questionnaireService.updateById(questionnaire))
+    public Result mod(int id,String theme) {
+        Questionnaire questionnaire = questionnaireService.getById(id);
+        if(questionnaire != null) {
+            questionnaire.setTheme(theme);
+            questionnaireService.updateById(questionnaire);
             return Result.success(questionnaire);
+        }
         else
-            return Result.fail();
+            return Result.fail("用户不存在！");
     }
     @PostMapping("/modQuestion")
-    public Result modQuestion(@RequestBody Question question) {
-        if(questionService.updateById(question))
-                return Result.success(question);
+    public Result modQuestion(int questionId,@RequestBody Question question) {
+        Question oldQuestion = questionService.getById(questionId);
+        oldQuestion.setNecessary(question.getNecessary());
+        oldQuestion.setTitle(question.getTitle());
+        oldQuestion.setType(question.getType());
+        if(questionService.updateById(oldQuestion))
+                return Result.success(oldQuestion);
         else
             return Result.fail();
     }
-
-//    @PostMapping("saveOrMod")
-//    public Result saveOrMod(@RequestBody Questionnaire questionnaire) {
-//        if(questionnaireService.saveOrUpdate(questionnaire))
-//            return Result.success(questionnaire);
-//        else
-//            return Result.fail();
-//    }
-
-    @GetMapping("/delete")
+   @CrossOrigin
+    @PostMapping("/delete")
     public Result delete( int id) {
         if(questionnaireService.removeById(id))
             return Result.success(id);
@@ -106,39 +107,37 @@ public class Controller {
 
     }
     @PostMapping("/deleteQuestion")
-    public Result deleteQuestion(int questionnaireId,int questionId) {
+    public Result deleteQuestion(int questionId) {
+        int number=questionService.getById(questionId).getNumber();
+        int questionnaireId=questionService.getById(questionId).getQuestionnaireId();
         if(questionService.removeById( questionId) ){
-            LambdaQueryWrapper<Questionnaire_question> deleteWrapper = new LambdaQueryWrapper<Questionnaire_question>();
-            deleteWrapper.eq(Questionnaire_question::getQnaireId,questionnaireId).eq(Questionnaire_question::getQuestionId,questionId);
-            if(questionnaire_questionService.remove(deleteWrapper)) {
-                LambdaQueryWrapper<Questionnaire_question> wrapper = new LambdaQueryWrapper<Questionnaire_question>();
-                wrapper.eq(Questionnaire_question::getQnaireId,questionnaireId);
-                List<Questionnaire_question> list = questionnaire_questionService.list(wrapper);
-                list.forEach(questionnaire_question -> {
-                    Question question = questionService.getById(questionnaire_question.getQuestionId());
-                    question.setNumber(question.getNumber() - 1);
-                    questionService.updateById(question);
-                });
-                return Result.success();
-            }
-            else
-            {
-                Question question = new Question();
-                question.setQuestionId(questionId);
-                saveQuestion(questionnaireId,question);
-                return Result.fail("删除问题成功，删除问卷联系失败！\n请根据上文判断空白问题是否创建成功，创建成功后重新执行删除操作\n如创建失败请手动从数据库删除联系" );
-            }
+            Questionnaire questionnaire=questionnaireService.getById(questionnaireId);
+            questionnaire.setQuestionNum(questionnaire.getQuestionNum()-1);
+            questionnaireService.updateById(questionnaire);
+            LambdaQueryWrapper<Question> deleteWrapper = new LambdaQueryWrapper<Question>();
+            deleteWrapper.eq(Question::getQuestionnaireId,questionnaireId).gt(Question::getNumber,number);
+           List<Question> list = questionService.list(deleteWrapper);
+           list.forEach(question->{
+               question.setNumber(question.getNumber()-1);
+               questionService.updateById(question);
+           });
+                   return Result.success(questionId);
         }
         else
             return Result.fail("删除问题失败！");
     }
-
+@CrossOrigin
     @PostMapping("/publish")
-    public Result publish(int id) {
-       Questionnaire questionnaire = questionnaireService.getById(id);
+    public Result publish(@RequestBody Questionnaire pub) {
+       Questionnaire questionnaire = questionnaireService.getById(pub.getId());
        if(questionnaire.getState()==0) {
            questionnaire.setState(1);
+           questionnaire.setReleaseTime(pub.getReleaseTime());
+           questionnaire.setEndTime(pub.getEndTime());
+           if(questionnaireService.updateById(questionnaire))
            return Result.success(questionnaire);
+           else
+               return Result.fail();
        }
        else if(questionnaire.getState()==1) {
            return Result.fail(1,"问卷已发布,返回错误1");
@@ -148,12 +147,55 @@ public class Controller {
            return Result.fail(2,"问卷已截止，如果要重新发布请选择rePublish,返回错误2");
        }
     }
+    @CrossOrigin
     @PostMapping("/rePublish")
-    public Result rePublish(int id) {
-        Questionnaire questionnaire = questionnaireService.getById(id);
+    public Result rePublish(@RequestBody Questionnaire time) {
+        Questionnaire questionnaire = questionnaireService.getById(time.getId());
             questionnaire.setState(1);
+        questionnaire.setReleaseTime(time.getReleaseTime());
+        questionnaire.setEndTime(time.getEndTime());
+        if(questionnaireService.updateById(questionnaire))
             return Result.success(questionnaire);
+        else
+            return Result.fail();
     }
+    @CrossOrigin
+    @PostMapping("/end")
+    public Result end(int id) {
+        Questionnaire questionnaire = questionnaireService.getById(id);
+        if(questionnaire.getState()==0) {
+            return Result.fail(0,"问卷未发布，返回数据0");
+        }
+        else if(questionnaire.getState()==2) {
+            return Result.fail(2,"问卷已截止，返回数据2");
+        }
+        questionnaire.setState(2);
+        if(questionnaireService.updateById(questionnaire))
+            return Result.success(questionnaire);
+        else
+            return Result.fail();
+    }
+    @CrossOrigin
+    @GetMapping("/checkState")
+    public Result checkState(int   id) {
+        Questionnaire questionnaire=questionnaireService.getById(id);
+        if(questionnaire.getState()==1) {
+            Date currentDate=new Date();
+            if(currentDate.before(questionnaire.getEndTime())) {
+                return Result.success(questionnaire);
+            }
+            else {
+                questionnaire.setState(2);
+                questionnaireService.updateById(questionnaire);
+                return Result.fail(2,"问卷已截止，返回数据2");
+            }
+        }
+        else if(questionnaire.getState()==2)
+            return Result.fail(2,"问卷已截止，返回数据2");
+        else
+                return Result.fail(0,"问卷未发布，返回数据0");
+        }
+
     @PostMapping("/listP")
     public Result listP(@RequestBody Questionnaire questionnaire)
     {

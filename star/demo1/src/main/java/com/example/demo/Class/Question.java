@@ -10,4 +10,7 @@ public class Question {
     int number;
     String title ;
     int necessary;
+    int type;
+    int questionnaireId;
+    int answerNum;
 }
