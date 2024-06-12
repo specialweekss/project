@@ -1,0 +1,10 @@
+.noUseButton:hover{
+    border-radius: 999px;
+    background: linear-gradient(143.01deg, rgba(224, 76, 180, 1) 0%, rgba(222, 16, 16, 0.01) 100%);
+    box-shadow: 0px 2px 4px rgba(136, 144, 194, 0.2), 0px 5px 15px rgba(37, 44, 97, 0.15);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 23px 32px 23px 32px;
+    box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 rgba(0, 0, 0, 0.19);
+}
