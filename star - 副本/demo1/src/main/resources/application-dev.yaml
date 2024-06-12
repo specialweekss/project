@@ -3,7 +3,7 @@ server:
   
 spring:
   datasource:
-    url: jdbc:mysql://192.168.94.188:3306/questionnaire
+    url: jdbc:mysql://localhost:3306/questionnaire
     driver-class-name: com.mysql.cj.jdbc.Driver
     username:  root
     password: 12345678

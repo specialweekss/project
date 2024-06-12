@@ -13,4 +13,5 @@ public class Question {
     int type;
     int questionnaireId;
     int answerNum;
+    int selectionNum;
 }

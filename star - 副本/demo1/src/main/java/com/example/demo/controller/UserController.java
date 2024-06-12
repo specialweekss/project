@@ -7,9 +7,7 @@ import com.example.demo.service.LogService;
 import lombok.extern.java.Log;
 import org.apache.ibatis.jdbc.Null;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
@@ -19,13 +17,13 @@ public class UserController {
 
     @Autowired
     private LogService logservice;
-
+    @CrossOrigin
     @GetMapping("/UserList")
     public Result UserList()
     {
    return Result.success(logservice.listAll(),logservice.count());
     }
-
+    @CrossOrigin
     @GetMapping("/Register")
     public Result Register(String username,String password)
     {
@@ -47,7 +45,7 @@ public class UserController {
         }
         else     return Result.fail(0,"密码账号不合规");
     }
-
+    @CrossOrigin
     @GetMapping("/LogIn")
     public Result LogIn(int userId,String password,int type)
     {
@@ -57,19 +55,41 @@ public class UserController {
        }
        else return Result.fail(2,"密码或账号错误");
     }
-    
-    @GetMapping("/Logout")//注销
-    public Result Logout(int userId,String password,int type)
+    @CrossOrigin
+    @GetMapping("/getUserById")
+    public Result getUserById(int userId)
     {
-        if (idcheck(userId,password,type))
-        {
+        return Result.success(logservice.getById(userId));
+    }
+    @CrossOrigin
+    @PostMapping("/ModUser")//修改密码或名称
+    public Result ModPassword(int userId,String newName,String newPassword)
+    {
+
+          //  if(registercheck(newName,newPassword))
+           // {
+                User user = logservice.getById(userId);
+                user.setPassword(newPassword);
+                user.setName(newName);
+                logservice.updateById(user);
+                return Result.success(userId);
+           // }
+            //else return Result.fail(0,"密码账号不合规");
+    }
+
+    @CrossOrigin
+    @PostMapping("/logOut")//注销
+    public Result Logout(int userId)//,String password,int type)
+    {
+        //if (idcheck(userId,password,type))
+        //{
           return DeleteUser(userId);
-        }
-        else     return Result.fail(2,"密码或账号错误");
+       // }
+        //else     return Result.fail(2,"密码或账号错误");
     }
 
    //登出时不需向后端传参，因此交由前端处理
-
+   @CrossOrigin
     @GetMapping("/DeleteUser")//删除
     public Result DeleteUser(int userId)
     {
@@ -78,7 +98,7 @@ public class UserController {
       else return Result.fail(3,"删除失败");
     }
 
-
+    @CrossOrigin
     @GetMapping("/ModUser")//修改密码或名称
     public Result ModPassword(int userId,String userName,String password,int type)
     {

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="4102b282-6932-415e-be07-2d8f57b1e3f0" name="更改" comment="star">
+      <change afterPath="$PROJECT_DIR$/demo_web/src/components/editPage.vue" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/demo_web/src/components/homePage.vue" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/demo_web/src/components/qusPage.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo1/src/main/java/com/example/demo/controller/Controller.java" beforeDir="false" afterPath="$PROJECT_DIR$/demo1/src/main/java/com/example/demo/controller/Controller.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo1/src/main/resources/application-dev.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/demo1/src/main/resources/application-dev.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_web" beforeDir="false" afterPath="$PROJECT_DIR$/demo_web" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_web/src/App.vue" beforeDir="false" afterPath="$PROJECT_DIR$/demo_web/src/App.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_web/src/components/HelloWorld.vue" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../star/demo_web" beforeDir="false" afterPath="$PROJECT_DIR$/../star/demo_web" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="spring-beans.schema" />
+        <option value="Class" />
+        <option value="Interface" />
+        <option value="Vue Composition API Component" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+    <option name="ROOT_SYNC" value="DONT_SYNC" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8
+}</component>
+  <component name="ProjectId" id="2gjBcQcViTPm1y7NOrQgdvUC4Vs" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;Spring Boot.Demo1Application.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/ideaproject/untitled1&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;npm.serve.executor&quot;: &quot;Run&quot;,
+    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;D:\\intellij idea\\IntelliJ IDEA 2024.1.1\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  },
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;redshift&quot;,
+      &quot;mysql_aurora_aws&quot;
+    ],
+    &quot;vue.recent.templates&quot;: [
+      &quot;Vue Composition API Component&quot;
+    ]
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\ideaproject\star - 副本\demo_web" />
+      <recent name="D:\ideaproject\star - 副本\demo_web\src" />
+      <recent name="D:\ideaproject\star - 副本" />
+      <recent name="D:\ideaproject\star - 副本\demo1\src\main\resources\mapper" />
+      <recent name="D:\ideaproject\star - 副本\demo1\src\main\java\com\example\demo\mapper" />
+    </key>
+    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="com.example.demo.service" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.example.demo.mapper" />
+      <recent name="com.example.demo.service.impl" />
+      <recent name="com.example.demo.service" />
+      <recent name="com.example.demo.other" />
+      <recent name="com.example.demo.mapper.mapper" />
+    </key>
+  </component>
+  <component name="RunManager" selected="npm.serve">
+    <configuration name="Demo1Application" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="demo1" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.example.demo.Demo1Application" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="serve" type="js.build_tools.npm" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/demo_web/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="serve" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="npm.serve" />
+      <item itemvalue="Spring Boot.Demo1Application" />
+    </list>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9f38398b9061-39b83d9b5494-intellij.indexing.shared.core-IU-241.15989.150" />
+        <option value="bundled-js-predefined-1d06a55b98c1-91d5c284f522-JavaScript-IU-241.15989.150" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="应用程序级" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="默认任务">
+      <changelist id="4102b282-6932-415e-be07-2d8f57b1e3f0" name="更改" comment="" />
+      <created>1716201187145</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1716201187145</updated>
+      <workItem from="1716201188262" duration="446000" />
+      <workItem from="1716340484288" duration="14756000" />
+      <workItem from="1716538269446" duration="277000" />
+      <workItem from="1716538810596" duration="522000" />
+      <workItem from="1716539345061" duration="762000" />
+      <workItem from="1716540887176" duration="1291000" />
+      <workItem from="1716621747647" duration="3416000" />
+      <workItem from="1716625449603" duration="22000" />
+      <workItem from="1716631538480" duration="1118000" />
+      <workItem from="1716689839257" duration="2869000" />
+      <workItem from="1716692737329" duration="4701000" />
+      <workItem from="1716699452521" duration="4931000" />
+      <workItem from="1716705413641" duration="2000" />
+      <workItem from="1716709470696" duration="1374000" />
+      <workItem from="1716710890520" duration="4908000" />
+      <workItem from="1716722399087" duration="372000" />
+      <workItem from="1716864943430" duration="9121000" />
+      <workItem from="1716891371354" duration="1473000" />
+      <workItem from="1716971135678" duration="332000" />
+      <workItem from="1716971524923" duration="7000" />
+      <workItem from="1716971546455" duration="19000" />
+    </task>
+    <task id="LOCAL-00001" summary="star">
+      <option name="closed" value="true" />
+      <created>1716711055383</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1716711055383</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="star" />
+    <option name="LAST_COMMIT_MESSAGE" value="star" />
+  </component>
+</project>
