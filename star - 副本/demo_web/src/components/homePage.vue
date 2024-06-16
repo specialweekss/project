@@ -1,5 +1,5 @@
 <template>
-  <div class="page" v-if="!showMy">
+  <div class="page" v-if="!showMy&&!showManage">
     <h1 id="welcome" >欢迎登录</h1>
     <img src="@/assets/img/登录图片.png" alt="图片" class="logo-image" />
     <div class="denglukuang">
@@ -11,32 +11,41 @@
   </div>
 
   <my-questionnaire v-if="showMy" :user-id="userId" :go-home="goHome"></my-questionnaire>
+  <manage v-if="showManage" :user-id="userId" :go-home="goHome"></manage>
 </template>
 
 <script>
 import myQuestionnaire from "@/components/MyQuestionnaire.vue";
 import axios from "axios";
+import manage from "@/components/allQuestionnaire.vue";
 export default {
   data() {
     return {
       password: '',
       showMy:false,
-      userId:null
+      showManage:false,
+      userId:null,
+      type:null
     };
   },
   components:{
-    myQuestionnaire
+    myQuestionnaire,
+    manage
   },
   methods: {
     goHome(){
       this.showMy=false
+      this.showManage=false
     },
    async login() {
-      const response=await axios.get('http://localhost:8090/LogIn?password='+this.password+'&userId='+this.userId+'&type=0')
+      const response=await axios.get('http://localhost:8090/LogIn?password='+this.password+'&userId='+this.userId)
+      this.type=response.data.data.type
      console.log(response);
       if(response.data.code===400){ alert('账号或密码错误！');}
-      else
+      else if(this.type===0)
       this.showMy=true;
+      else
+        this.showManage=true;
       // 这里可以使用axios或fetch等发起登录请求到后端接口
     },
   },

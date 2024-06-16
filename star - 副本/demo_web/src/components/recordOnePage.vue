@@ -1,14 +1,18 @@
 
 <template>
   <el-button type="primary" @click="close">退出</el-button>
-  <div>{{theme}}</div>
+  <h1>{{theme}}</h1>
   <div v-for="question in questions" :key="question.number">
-    问题{{question.number}}.{{question.title}}  --{{getQuestionType(question.type)}}
+    <h2>问题{{question.number}}.{{question.title}}  --{{getQuestionType(question.type)}}</h2>
     <div v-if="question.type===0||question.type===1">
       <div v-for="selection in selectionForAll.at(question.number-1)" :key="selection.position">
         选项{{getSelectionPosition(selection.position)}}.{{selection.content}}
       </div>
     </div>
+    ------------------------------------------------------------------------------------------
+    <h2>填写总次数：{{question.answerNum}}</h2>
+    <el-button v-if="!IsShowed(question)" type="primary" @click="recordOn(question)">展开</el-button>
+    <div v-if="IsShowed(question)">
     <div v-for="(value,index) in answerForAll.at(question.number-1)" :key="index">
       <div v-if="question.type===0||question.type===1">
         <span>填写记录{{index+1}}：</span>
@@ -19,6 +23,8 @@
       <div v-else>
         填写记录{{index+1}}：{{value.answer}}
       </div>
+    </div>
+      <el-button  type="primary" @click="recordOff(question)">收回</el-button>
     </div>
     <br><br>
   </div>
@@ -34,7 +40,8 @@ export default {
       theme: null,
       questions: [],
       selectionForAll: [],
-      answerForAll: []
+      answerForAll: [],
+      questionOn:[]
     }
   },
   mounted() {
@@ -64,11 +71,31 @@ export default {
       })
 
     },
+    recordOn(question)
+    {
+      this.questionOn.push(question.questionId)
+    },
+    recordOff(question)
+    {
+
+      let index=this.questionOn.indexOf(question.questionId);
+      this.questionOn.splice(index,1);
+      console.log(index);
+    },
+    IsShowed(question){
+      const list=this.questionOn;
+      let show=false;
+      list.forEach(value=>{
+        if(question.questionId===value)
+          show=true;
+      })
+      return show;
+    },
     getQuestionType(type) {
       const types = {
         0: '单选题',
         1: '多选题',
-        2: '打分题',
+        2: '打分题(1~10)',
         3: '填空题'
       };
       return types[type];

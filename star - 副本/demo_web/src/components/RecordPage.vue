@@ -1,4 +1,5 @@
 <template>
+
   <div v-if="!showRecord">
     <div class="border">
       <!-- 返回按钮 -->
@@ -33,11 +34,11 @@
     <main>
       <div v-for="(value,index) in records" :key="index">
       <div class="recordMessage">
-
         <p class="Qname">问卷id：{{value.questionnaireId}}</p>
-        <img src="@/assets/img/查看.png" alt="图片" @click="handleCheckClick" />
+        <img src="@/assets/img/查看.png" alt="图片" @click="recordOn(value)" />
         <a class="check" @click="recordOn(value)">查看</a>
       </div>
+        <br><br>
       </div>
     </main>
   </div>
@@ -101,11 +102,12 @@ this.fetchRecord()
 
 .recordMessage {
   left: 550px;
-  top: -800px;
+  top: -1100px;
   width: 1400px;
   border-radius: 30px;
   background: linear-gradient(135deg, rgba(174, 235, 198, 1) 0%, rgba(111, 227, 158, 0.01) 100%);
   position: relative;
+  display: flex;
 }
 
 .Qname {

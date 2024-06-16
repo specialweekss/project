@@ -47,11 +47,11 @@ public class UserController {
     }
     @CrossOrigin
     @GetMapping("/LogIn")
-    public Result LogIn(int userId,String password,int type)
+    public Result LogIn(int userId,String password)
     {
-       if(idcheck(userId,password,type))
+       if(idcheck(userId,password))
        {
-           return Result.success(userId);//成功返回userid
+           return Result.success(logservice.getById(userId));//成功返回用户信息
        }
        else return Result.fail(2,"密码或账号错误");
     }
@@ -90,7 +90,7 @@ public class UserController {
 
    //登出时不需向后端传参，因此交由前端处理
    @CrossOrigin
-    @GetMapping("/DeleteUser")//删除
+    @PostMapping("/DeleteUser")//删除
     public Result DeleteUser(int userId)
     {
       if(logservice.removeById(userId))
@@ -102,7 +102,7 @@ public class UserController {
     @GetMapping("/ModUser")//修改密码或名称
     public Result ModPassword(int userId,String userName,String password,int type)
     {
-        if (idcheck(userId,password, type))
+        if (idcheck(userId,password))
         {
             if(registercheck(userName,password))
             {
@@ -138,11 +138,11 @@ public class UserController {
         return logservice.count(wrapper)>0;
     }
 
-    public boolean idcheck(int userId,String password,int type)//检查id和密码
+    public boolean idcheck(int userId,String password)//检查id和密码
     {
         User user=logservice.getById(userId);
         if (user == null)return false;
-        else return Objects.equals(user.getPassword(), password) && user.getType() == type;
+        else return Objects.equals(user.getPassword(), password) ;
     }
 
 

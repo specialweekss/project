@@ -5,12 +5,16 @@
   <h1>{{theme}}：【{{getState(state)}}】</h1>
   <div v-if="questions!==null">
   <div v-for="question in questions" :key="question.number">
-    问题{{question.number}}.{{question.title}}  --{{getQuestionType(question.type)}}
+    <h2>问题{{question.number}}.{{question.title}}  --{{getQuestionType(question.type)}} -{{getNecessary(question.necessary)}}</h2>
     <div v-if="question.type===0||question.type===1">
       <div v-for="selection in selectionForAll.at(question.number-1)" :key="selection.position">
         选项{{getSelectionPosition(selection.position)}}.{{selection.content}}
       </div>
     </div>
+    ---------------------------------------------------------------
+    <h3>填写总次数：{{question.answerNum}}</h3>
+    <el-button v-if="!IsShowed(question)" type="primary" @click="recordOn(question)">展开</el-button>
+    <div v-if="IsShowed(question)">
     <br><div>填写记录：<br></div>
     <div v-for="(value,index) in answerForAll.at(question.number-1)" :key="index">
 
@@ -24,6 +28,8 @@
           用户{{value.userId}}：{{value.answer}}
       </div>
       </div>
+      <el-button  type="primary" @click="recordOff(question)">收回</el-button>
+    </div>
     </div>
     <br><br>
   </div>
@@ -43,18 +49,39 @@ export default {
       questions: [],
       selectionForAll: [],
       answerForAll: [],
-      state:null
+      state:null,
+      questionOn:[]
     }
   },
   mounted() {
     this.fetchQuestionnaire()
   },
   methods: {
+    recordOn(question)
+    {
+      this.questionOn.push(question.questionId)
+    },
+    recordOff(question)
+    {
+
+      let index=this.questionOn.indexOf(question.questionId);
+      this.questionOn.splice(index,1);
+      console.log(index);
+    },
+    IsShowed(question){
+      const list=this.questionOn;
+      let show=false;
+      list.forEach(value=>{
+        if(question.questionId===value)
+          show=true;
+      })
+      return show;
+    },
     async fetchQuestionnaire() {
-      const response = axios.get('http://localhost:8090/getById?id=' + this.id);
+      const response = axios.get(' http://localhost:8090/getById?id=' + this.id);
       this.theme = (await response).data.data.theme;
       this.state=(await response).data.data.state;
-      const quesResponse = axios.get('http://localhost:8090/ListQuestionInIt?id=' + this.id);
+      const quesResponse = axios.get(' http://localhost:8090/ListQuestionInIt?id=' + this.id);
       this.questions = (await quesResponse).data.data;
       const list = this.questions
       if ((await quesResponse).data.code===400)
@@ -64,13 +91,13 @@ export default {
       }
       else {
         list.forEach(question => {
-          axios.get('http://localhost:8090/ListAnswerInIt?questionId=' + question.questionId)
+          axios.get(' http://localhost:8090/ListAnswerInIt?questionId=' + question.questionId)
               .then(response => {
                 this.answerForAll[question.number - 1] = response.data.data;
                 console.log(this.answerForAll)
               })
 
-          axios.get('http://localhost:8090/ListSelectionInIt?questionId=' + question.questionId)
+          axios.get(' http://localhost:8090/ListSelectionInIt?questionId=' + question.questionId)
               .then(response => {
 
                 this.selectionForAll[question.number - 1] = response.data.data;
@@ -112,6 +139,14 @@ export default {
       };
       return states[state];
     },
+    getNecessary(necessary)
+    {
+      const states= {
+        0: '选填',
+        1: '必填',
+      };
+      return states[necessary];
+    }
   }
 }
 

@@ -12,6 +12,8 @@ import com.example.demo.service.QuestionnaireService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.List;
 
@@ -127,6 +129,7 @@ private SelectionService selectionService;
 @GetMapping("/getById")
 public Result getById(int id) {
         Questionnaire questionnaire=questionnaireService.getById(id);
+
         if(questionnaire!=null)
             return Result.success(questionnaire);
         else
@@ -228,7 +231,10 @@ public Result getById(int id) {
            questionnaire.setReleaseTime(pub.getReleaseTime());
            questionnaire.setEndTime(pub.getEndTime());
            if(questionnaireService.updateById(questionnaire))
-           return Result.success(questionnaire);
+           {
+               System.out.println(Result.success(questionnaire));
+               return Result.success(questionnaire);
+           }
            else
                return Result.fail();
        }
@@ -284,5 +290,11 @@ public Result getById(int id) {
         LambdaQueryWrapper<Question> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(Question::getTitle, question.getTitle());
         return Result.success(questionService.list(wrapper),questionService.count(wrapper));
+    }
+    @CrossOrigin
+    @GetMapping("/getIp")
+    public String getIp() throws UnknownHostException {
+          InetAddress inetAddress = InetAddress.getLocalHost();
+            return inetAddress.getHostAddress();
     }
 }

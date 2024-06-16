@@ -7,11 +7,9 @@ import com.example.demo.Class.Questionnaire;
 import com.example.demo.Class.Record;
 import com.example.demo.controller.RecordController;
 import com.example.demo.other.Result;
-import com.example.demo.service.AnswerService;
-import com.example.demo.service.QuestionService;
-import com.example.demo.service.QuestionnaireService;
-import com.example.demo.service.RecordService;
+import com.example.demo.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.server.DelegatingServerHttpResponse;
 import org.springframework.web.bind.annotation.*;
 import java.util.Date;
 import java.util.List;
@@ -60,21 +58,24 @@ public class fillController {
     @CrossOrigin
     @GetMapping("/checkState")
     public Result checkState(int   id) {
-        Questionnaire questionnaire=questionnaireService.getById(id);
-        if(questionnaire.getState()==1) {
-            Date currentDate=new Date();
-            if(currentDate.before(questionnaire.getEndTime())) {
-                return Result.success(questionnaire);
-            }
-            else {
-                questionnaire.setState(2);
-                questionnaireService.updateById(questionnaire);
-                return Result.fail(2,"问卷已截止，返回数据2");
-            }
+        Questionnaire questionnaire = questionnaireService.getById(id);
+        if (questionnaire!=null){
+            if (questionnaire.getState() == 1) {
+                Date currentDate = new Date();
+                if (currentDate.before(questionnaire.getEndTime())) {
+                    return Result.success(questionnaire);
+                } else {
+                    questionnaire.setState(2);
+                    questionnaireService.updateById(questionnaire);
+                    return Result.fail(2, "问卷已截止，返回数据2");
+                }
+            } else if (questionnaire.getState() == 2)
+                return Result.fail(2, "问卷已截止，返回数据2");
+            else
+                return Result.fail(0, "问卷未发布，返回数据0");
         }
-        else if(questionnaire.getState()==2)
-            return Result.fail(2,"问卷已截止，返回数据2");
         else
-            return Result.fail(0,"问卷未发布，返回数据0");
+            return Result.fail(0,"问卷不存在");
     }
+
 }

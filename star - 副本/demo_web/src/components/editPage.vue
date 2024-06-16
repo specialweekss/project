@@ -1,22 +1,16 @@
 <template>
 <el-button type="primary" @click="close">退出</el-button>
   <h1>{{questionnaire.theme}}：【{{getState(questionnaire.state)}}】</h1>
-    <div v-for="question in questions" :key="question.number">
-      问题{{question.number }}. {{question.title}} -{{getQuestionType(question.type)}}
-      <el-button type="text"  @click="deleteQuestion(question.questionId)" >删除</el-button>
-      <el-button type="text"  @click="modOn(question)">修改</el-button>
-      <div v-if="isChoice(question)">
-        <div v-for="selection in selectionsForAll.at(question.number-1)" :key="selection.position">
-          选项{{getSelectionPosition(selection.position)}}.{{selection.content}}
-          <el-button type="text" @click="deleteSelection(selection.selectionId)">删除</el-button>
-          <el-button type="text" @click="modSelectionOn(selection.selectionId)">修改</el-button>
-          <div v-if="showModSelection&&selection.selectionId===beModSelectionId">
-            <input v-model="content" placeholder="选项标题" required><br>
-            <el-button type="primary" @click="modSelection(selection.selectionId)">确定</el-button>
-          </div>
-        </div>
-        <el-button type="text" @click="addSelection(question.questionId)">添加选项</el-button>
-      </div>
+  <h2 v-if="questionnaire.state===1">
+    发布时间：{{questionnaire.releaseTime}} <br> 截止时间：{{ questionnaire.endTime}}
+  </h2>
+  ---------------------------------------------------------<br>
+    <div v-for="question in questions" :key="question.number" >
+
+      问题{{question.number }}. {{question.title}} -{{getQuestionType(question.type)}} -{{getNecessary(question.necessary)}}
+
+        <el-button type="text"  class="delete-button" @click="deleteQuestion(question.questionId)" >删除</el-button>
+      <el-button type="text"   @click="modOn(question)">修改</el-button>
       <div v-if="showMod&&beMod(question.questionId)">
         <form @submit.prevent="handleSubmit">
           <input v-model="title" placeholder="问题标题" required><br>
@@ -32,7 +26,21 @@
         </form>
         <el-button v-if="showMod" type="primary" @click="modQuestion(question.questionId)">确定</el-button>
       </div>
+      <div v-if="isChoice(question)">
+        <div v-for="selection in selectionsForAll.at(question.number-1)" :key="selection.position">
+          选项{{getSelectionPosition(selection.position)}}.{{selection.content}}
+          <el-button type="text" class="delete-button" @click="deleteSelection(selection.selectionId)">删除</el-button>
+          <el-button type="text" @click="modSelectionOn(selection)">修改</el-button>
+          <div v-if="showModSelection&&selection.selectionId===beModSelectionId">
+            <input v-model="content" placeholder="选项标题" required><br>
+            <el-button type="primary" @click="modSelection(selection.selectionId)">确定</el-button>
+          </div>
+        </div>
+        <el-button type="text" @click="addSelection(question.questionId)">添加选项</el-button>
+      </div>
 
+    <br>
+      ---------------------------------------------------------
     </div>
 
   <!-- 添加问题按钮 -->
@@ -78,7 +86,7 @@ export default {
       questionnaire: [],
       title: "",
       selectionsForAll:[],
-      content:"",
+      content:"选项",
       showModSelection:false,
       beModSelectionId:null
     };
@@ -93,12 +101,20 @@ export default {
       console.log(this.creatorId);
         const response = await axios.get(`http://localhost:8090/getById?id=${this.id}`);
         this.questionnaire = response.data.data;
+      let releaseTime=new Date(this.questionnaire.releaseTime)
+      let endTime=new Date(this.questionnaire.endTime)
+
+      console.log(releaseTime)
+      this.questionnaire.releaseTime=releaseTime;
+      this.questionnaire.endTime=endTime
+        console.log(response)
       this.questions=[];
       await axios.get('http://localhost:8090/ListQuestionInIt?id='+this.id)
           .then(response=>{
             if(response.data.code===200) {
               const list = response.data.data;
               list.forEach(question => {
+
                 this.questions.push(question);
               })
             }
@@ -110,22 +126,19 @@ export default {
       this.selectionsForAll=[];
       const list=this.questions
      list.forEach(question=>{
-       console.log(question.questionId)
          axios.get('http://localhost:8090/ListSelectionInIt?questionId='+question.questionId)
              .then(response=>{
                this.selectionsForAll[question.number-1]=response.data.data;
                });
              })
 
-
-      console.log(this.selectionsForAll)
     },
     getQuestionType(type) {
       // 根据实际情况定义问题类型的映射
       const types = {
         0: '单选题',
         1: '多选题',
-        2: '打分题',
+        2: '打分题(1~10)',
         3:'填空题'
       };
       return types[type] || '未知类型';
@@ -152,6 +165,14 @@ export default {
         2: '已截止',
       };
       return states[state];
+    },
+    getNecessary(necessary)
+    {
+      const states= {
+        0: '选填',
+        1: '必填',
+      };
+      return states[necessary];
     },
    async addOn(){
      this.showAdd=true;
@@ -196,6 +217,7 @@ console.log(questionId);
       this.beModQuestionId=question.questionId;
       this.necessary=question.necessary;
       this.title=question.title;
+      this.type=question.type
     },
     beMod(questionId)
     {
@@ -209,6 +231,7 @@ console.log(questionId);
         const questionData = {
           "title": this.title, // 问题标题
           "necessary": this.necessary, // 假设默认不是必填
+          "type" :this.type
         };
         console.log(questionData);
         // 发送请求添加问题
@@ -245,10 +268,11 @@ console.log(questionId);
     console.log(response);
     await this.fetchQuestionnaire();
   },
-    modSelectionOn(selectionId)
+    modSelectionOn(selection)
     {
       this.showModSelection=true;
-      this.beModSelectionId=selectionId
+      this.beModSelectionId=selection.selectionId;
+   this.content=selection.content
     },
     async modSelection(selectionId)
     {
@@ -260,3 +284,39 @@ console.log(questionId);
   }
 }
 </script>
+<style>
+@import '@/css/border.css';
+@import '@/css/bordertext.css';
+@import '@/css/noUseButton.css';
+@import '@/css/usingButton.css';
+@import '@/css/buttonHover.css';
+.delete-button{
+  color: red;
+}
+.recordMessage {
+  left: 550px;
+  top: -700px;
+  width: 1400px;
+  border-radius: 30px;
+  background: linear-gradient(135deg, rgba(174, 235, 198, 1) 0%, rgba(111, 227, 158, 0.01) 100%);
+  position: relative;
+  display: flex;
+}
+.recordMessage img{
+  margin-left: 50px;
+}
+
+.recordMessage a {
+  padding: 6px 12px;
+  font-size: 14px;
+  color: #007bff;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.recordMessage a:hover {
+  background-color: #e9ecef;
+}
+
+</style>

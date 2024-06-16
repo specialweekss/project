@@ -39,11 +39,13 @@
             <el-button type="text" class="edit" @click="editOn(value)">编辑</el-button>
             <img src="../assets/img/删除.png" alt="图片" @click="Delete(value)" />
             <el-button type="text" class="edit" @click="Delete(value)">删除</el-button>
-            <img src="../assets/img/发布.png" alt="图片" @click="publish(value)" />
-            <el-button type="text" class="edit" @click="publish(value)">发布</el-button>
+            <img src="../assets/img/发布.png" alt="图片" @click="OnPublishDialog" />
+            <el-button type="text" class="edit" @click="OnPublishDialog">发布</el-button>
             <div v-if="publishDialog" class="dialog">
-              <p>问卷发布成功！</p>
-              <button @click="closePublishDialog">确定</button>
+              <div>请输入截止时间</div>
+              <el-date-picker v-model="endTime"    type="datetime" /><br>
+              <button @click="publish(value)">确定</button>
+              <button @click="OffPublishDialog(value)">取消</button>
             </div>
             <img src="../assets/img/截止.png" alt="图片" @click="end(value) "/>
             <el-button type="text" class="edit" @click="end(value)">截止</el-button>
@@ -53,6 +55,13 @@
             </div>
             <img src="../assets/img/查看.png" alt="图片" @click="dataOn(value)" />
             <el-button type="text" class="edit" @click="dataOn(value)">查看</el-button>
+            <img src="../assets/img/发布.png" alt="图片" @click="getLink(value)" />
+            <el-button type="text" class="edit" @click="getLink(value)">生成链接</el-button>
+            <div class="dialog" v-if="showLink">
+              <div>链接生成成功！</div>
+              {{link}}<br>
+              <button @click="linkOff">确定</button>
+            </div>
           </div>
           <br><br>
         </div>
@@ -67,8 +76,9 @@
   <PersonalPage v-if="showPersonal" :user-id="userId" :my="MyOn" :create-on="CreateOn" :record-on="RecordOn" :go-home="goHome"></PersonalPage>
   <Record v-if="showRecord" :my="MyOn" :user-id="userId" :create-on="CreateOn" :personal-on="PersonalOn" :go-home="goHome"></Record>
 </template>
+<script >
 
-<script>
+import '@vuepic/vue-datepicker/dist/main.css'
 import CreateQuestionnaire from "@/components/CreateQuestionnaire.vue";
 import PersonalPage from "@/components/PersonalPage.vue";
 import Record from "@/components/RecordPage.vue";
@@ -79,6 +89,8 @@ export default {
   props:['userId','goHome'],
   data(){
     return{
+      releaseTime : new Date(),
+      endTime : null,
       showCreate:false,
       showPersonal:false,
       showRecord:false,
@@ -88,7 +100,9 @@ export default {
       showEdit:false,
       questionnaireId:null,
       publishDialog: false,
-      endDialog:false
+      endDialog:false,
+      link:'',
+      showLink:false
     }
   },
   components:{
@@ -102,6 +116,16 @@ export default {
     this.fetchQuestionnaire()
   },
   methods: {
+    async getLink(questionnaire){
+      const response=await axios.get('http://localhost:8090/getIp');
+      const ip=response.data;
+      this.link='http://'+ip+':8081/?questionnaireId='+questionnaire.id;
+      console.log(this.link)
+      this.showLink=true;
+    },
+    linkOff(){
+      this.showLink=false;
+    },
     dataOn(questionnaire){
       this.questionnaireId=questionnaire.id;
       console.log(questionnaire.id);
@@ -135,21 +159,38 @@ export default {
       console.log(response)
       await this.fetchQuestionnaire();
     },
-    async publish(questionnaire){
-      let commit;
-      commit={
-        "id": questionnaire.id,
-        "releaseTime": new Date(),
-        "endTime":new Date("2020/06/12 00:00:10")
-      }
-      const response=await axios.post('http://localhost:8090/publish?',commit)
-      console.log(response)
+    OnPublishDialog(){
       this.publishDialog = true;
     },
-    closePublishDialog() {
+    OffPublishDialog(){
+      this.publishDialog = false;
+    },
+    async publish(questionnaire){
+      let commit;
+      let releaseTime=Date.parse(this.releaseTime),
+          endTime=Date.parse(this.endTime)
+      if(releaseTime>=endTime)
+      {
+        alert('发布时间不应小于截止时间！')
+        return
+      }
+
+      commit={
+        "id": questionnaire.id,
+        "releaseTime":releaseTime,
+        "endTime":endTime
+      }
+      console.log(commit)
+      const response=await axios.post('http://localhost:8090/publish?',commit)
+      console.log(response)
       this.publishDialog = false;
     },
     async end(questionnaire){
+      if(questionnaire.state===0)
+      {
+        alert('问卷未发布！')
+        return;
+      }
       const response=await axios.post('http://localhost:8090/end?id='+questionnaire.id)
       console.log(response)
       this.endDialog=true;
