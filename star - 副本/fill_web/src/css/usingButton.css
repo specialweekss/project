@@ -1,0 +1,15 @@
+.usingButton{
+    left: 0px;
+    width: 398px;
+    height: 162px;
+    border-radius: 999px;
+    background: linear-gradient(143.01deg, rgba(209, 209, 82, 1) 0%, rgba(44, 212, 92, 0.12) 89.24%, rgba(54, 159, 173, 0.01) 100%);
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 23px 32px 23px 32px;
+    cursor: not-allowed;
+    margin-top: 40px;
+}

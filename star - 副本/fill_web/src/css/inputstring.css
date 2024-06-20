@@ -1,0 +1,17 @@
+.inputstring {
+    position: relative;
+    left: 47px;
+    top: 116px;
+    width: 746px;
+    height: 117px;
+    border-radius: 20px;
+    font-family: "Noto Sans SC";
+    font-size: 36px;
+    font-weight: 400;
+    letter-spacing: 0px;
+    line-height: 52.13px;
+    color: rgba(122, 113, 113, 1);
+    text-align: left;
+    vertical-align: top;
+    background: rgba(229, 229, 229, 1);
+}
