@@ -231,10 +231,7 @@ public Result getById(int id) {
            questionnaire.setReleaseTime(pub.getReleaseTime());
            questionnaire.setEndTime(pub.getEndTime());
            if(questionnaireService.updateById(questionnaire))
-           {
-               System.out.println(Result.success(questionnaire));
-               return Result.success(questionnaire);
-           }
+           return Result.success(questionnaire);
            else
                return Result.fail();
        }
@@ -292,9 +289,9 @@ public Result getById(int id) {
         return Result.success(questionService.list(wrapper),questionService.count(wrapper));
     }
     @CrossOrigin
-    @GetMapping("/getIp")
+    @GetMapping("getIp")
     public String getIp() throws UnknownHostException {
-          InetAddress inetAddress = InetAddress.getLocalHost();
-            return inetAddress.getHostAddress();
+        InetAddress inetAddress = InetAddress.getLocalHost();
+        return inetAddress.getHostAddress();
     }
 }

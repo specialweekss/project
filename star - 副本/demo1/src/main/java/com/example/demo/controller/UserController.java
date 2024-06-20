@@ -24,7 +24,7 @@ public class UserController {
    return Result.success(logservice.listAll(),logservice.count());
     }
     @CrossOrigin
-    @GetMapping("/Register")
+    @PostMapping("/Register")
     public Result Register(String username,String password)
     {
         if(registercheck(username, password))
@@ -119,13 +119,13 @@ public class UserController {
     public boolean registercheck(String name,String password)//仅检查命名规则
     {
         int flag1=0,flag2=0,flag3=0;
-        if(name.length()<2||password.length()<3||name.length()>8||password.length()>10)return false;
-        else
+       // if(name.length()<2||password.length()<3||name.length()>8||password.length()>10)return false;
+        //else
             for(int i=0;i<password.length();i++)
             {
-                if(password.charAt(i)>65&&password.charAt(i)<90)flag1=1;
-                if(password.charAt(i)>97&&password.charAt(i)<122)flag2=1;
-                if(password.charAt(i)>123&&password.charAt(i)<152)flag3=1;
+                if(password.charAt(i)>=65&&password.charAt(i)<=90)flag1=1;
+                if(password.charAt(i)>=97&&password.charAt(i)<=122)flag2=1;
+                if(password.charAt(i)>=48&&password.charAt(i)<=57)flag3=1;
             }
         return flag1 == 1 && flag2 == 1 && flag3 == 1;
     }
@@ -135,7 +135,7 @@ public class UserController {
     {
         LambdaQueryWrapper<User> wrapper=new LambdaQueryWrapper<>();
         wrapper.eq(User::getName,username);
-        return logservice.count(wrapper)>0;
+        return logservice.count(wrapper)==0;
     }
 
     public boolean idcheck(int userId,String password)//检查id和密码
