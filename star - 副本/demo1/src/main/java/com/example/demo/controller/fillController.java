@@ -75,7 +75,7 @@ public class fillController {
                 return Result.fail(0, "问卷未发布，返回数据0");
         }
         else
-            return Result.fail(0,"问卷不存在");
+            return Result.fail(-1,"问卷不存在");
     }
 
 }

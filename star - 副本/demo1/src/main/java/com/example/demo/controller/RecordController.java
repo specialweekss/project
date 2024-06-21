@@ -2,11 +2,11 @@ package com.example.demo.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.demo.Class.Answer;
+import com.example.demo.Class.Questionnaire;
 import com.example.demo.other.Result;
-import com.example.demo.service.AnswerService;
-import com.example.demo.service.LogService;
-import com.example.demo.service.RecordService;
+import com.example.demo.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 import com.example.demo.Class.Record;
 
@@ -21,6 +21,10 @@ public class RecordController {
     RecordService recordService;
     @Autowired
     AnswerService answerService;
+    @Autowired
+    QuestionService questionService;
+    @Autowired
+    private QuestionnaireService questionnaireService;
 
     @CrossOrigin
     @GetMapping("/ListRecord")
@@ -79,6 +83,9 @@ public class RecordController {
         Record record=new Record();
         record.setUserId(userId);
         record.setQuestionnaireId(questionnaireId);
+        record.setIsDeleted(0);
+        Questionnaire questionnaire=questionnaireService.getById(questionnaireId);
+        record.setTheme(questionnaire.getTheme());
         Date date=new Date();
         record.setRecordTime(date);
         if(recordService.save(record))

@@ -10,5 +10,6 @@ public class Answer {
     int questionId;
     int userId;
     int type;
+    int isValid=1;
     String Answer ;
 }

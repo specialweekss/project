@@ -12,4 +12,5 @@ public class Record {
     int questionnaireId;
     Date recordTime;
     int isDeleted;
+    String theme;
 }

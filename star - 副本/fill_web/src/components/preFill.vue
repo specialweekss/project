@@ -6,7 +6,7 @@ export default {
   data() {
 
     return {
-      id: null,
+      id: '',
       showFill:false
     }
   },
@@ -25,6 +25,18 @@ export default {
       }
     },
     async fillOn(){
+      let idNUm=Number(this.id);
+      console.log(this.id)
+      if(this.id===(''||null))
+      {
+        alert('请输入问卷id!')
+        return
+      }
+      else if(idNUm.toString()!==this.id)
+      {
+        alert('问卷id格式错误！')
+        return
+      }
       const state=(await axios.get('http://localhost:8090/checkState?id=' + this.id)).data.data
       if(state===0)
       {

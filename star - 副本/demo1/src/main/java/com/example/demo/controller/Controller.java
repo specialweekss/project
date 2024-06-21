@@ -1,21 +1,20 @@
 package com.example.demo.controller;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.example.demo.Class.Question;
-import com.example.demo.Class.Questionnaire;
-import com.example.demo.Class.Selection;
+import com.example.demo.Class.*;
+import com.example.demo.Class.Record;
 import com.example.demo.other.Result;
-import com.example.demo.service.AnswerService;
-import com.example.demo.service.SelectionService;
-import com.example.demo.service.QuestionService;
-import com.example.demo.service.QuestionnaireService;
+import com.example.demo.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import com.example.demo.controller.fillController;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 
 @RestController//当成main
@@ -24,6 +23,8 @@ public class Controller {
     private QuestionnaireService questionnaireService;
     @Autowired
     private QuestionService questionService;
+    @Autowired
+    private RecordService recordService;
 @Autowired
 private AnswerService answerService;
 @Autowired
@@ -88,6 +89,10 @@ private SelectionService selectionService;
     @PostMapping("/saveQuestion")
 
     public Result saveQuestion(int id,@RequestBody Question question) {
+        if(question.getTitle().isBlank() || question.getTitle().isEmpty())
+        {
+            return Result.fail(0,"问题无标题");
+        }
         Questionnaire questionnaire = questionnaireService.getById(id);
         question.setNumber(questionnaire.getQuestionNum()+1);
         questionnaire.setQuestionNum(questionnaire.getQuestionNum()+1);
@@ -101,6 +106,7 @@ private SelectionService selectionService;
             wrapper.eq(Question::getQuestionnaireId,id).eq(Question::getNumber,question.getNumber());
             List<Question> list = questionService.list(wrapper);
             int questionId=list.get(0).getQuestionId();
+            saveSelection(questionId,selection);
             saveSelection(questionId,selection);
         }
         if(questionnaireService.updateById(questionnaire)) {
@@ -150,30 +156,69 @@ public Result getById(int id) {
     @CrossOrigin
     @PostMapping("/modQuestion")
     public Result modQuestion(int questionId,@RequestBody Question question) {
+        if(question.getTitle().isBlank() || question.getTitle().isEmpty())
+        {
+            return Result.fail(0,"问题无标题");
+        }
         Question oldQuestion = questionService.getById(questionId);
         oldQuestion.setNecessary(question.getNecessary());
         oldQuestion.setTitle(question.getTitle());
         oldQuestion.setType(question.getType());
-        if(questionService.updateById(oldQuestion))
-                return Result.success(oldQuestion);
+        if(questionService.updateById(oldQuestion)) {
+            //标记答案无效
+            inValidAnswer(questionId);
+            return Result.success(oldQuestion);
+        }
         else
             return Result.fail();
     }
+
+    public void inValidAnswer(int questionId) {
+        LambdaQueryWrapper<Answer> answerWrapper = new LambdaQueryWrapper<>();
+        answerWrapper.eq(Answer::getQuestionId,questionId).eq(Answer::getIsValid,1);
+        List<Answer> answerList = answerService.list(answerWrapper);
+        if(!answerList.isEmpty()) {
+            answerList.forEach(answer -> {
+                answer.setIsValid(0);
+                answerService.updateById(answer);
+            });
+        }
+    }
+
     @CrossOrigin
     @PostMapping("/modSelection")
     public Result modSelection(int selectionId,String content) {
+        if(content.isBlank()|| content.isEmpty())
+        {
+            return Result.fail(0,"选项无标题");
+        }
         Selection oldSelection = selectionService.getById(selectionId);
         oldSelection.setContent(content);
         if(selectionService.updateById(oldSelection))
+        {
+            inValidAnswer(oldSelection.getQuestionId());
             return Result.success(oldSelection);
+        }
         else
             return Result.fail();
     }
    @CrossOrigin
     @PostMapping("/delete")
     public Result delete( int id) {
-        if(questionnaireService.removeById(id))
+        if(questionnaireService.removeById(id)) {
+            //删除问题
+            LambdaQueryWrapper<Question> questionWrapper = new LambdaQueryWrapper<>();
+            questionWrapper.eq(Question::getQuestionnaireId,id);
+            List<Question> list = questionService.list(questionWrapper);
+            if(!list.isEmpty()) {
+                list.forEach(question -> {
+                    deleteQuestion(question.getQuestionId());
+                });
+            }
+            LambdaQueryWrapper<Record> recordWrapper = new LambdaQueryWrapper<>();
+
             return Result.success(id);
+        }
         else
             return Result.fail();
 
@@ -183,16 +228,34 @@ public Result getById(int id) {
         int number=questionService.getById(questionId).getNumber();
         int questionnaireId=questionService.getById(questionId).getQuestionnaireId();
         if(questionService.removeById( questionId) ){
+
             Questionnaire questionnaire=questionnaireService.getById(questionnaireId);
-            questionnaire.setQuestionNum(questionnaire.getQuestionNum()-1);
-            questionnaireService.updateById(questionnaire);
-            LambdaQueryWrapper<Question> deleteWrapper = new LambdaQueryWrapper<Question>();
-            deleteWrapper.eq(Question::getQuestionnaireId,questionnaireId).gt(Question::getNumber,number);
-           List<Question> list = questionService.list(deleteWrapper);
-           list.forEach(question->{
-               question.setNumber(question.getNumber()-1);
-               questionService.updateById(question);
-           });
+            if(questionnaire!=null) {
+                //问卷问题-1
+                questionnaire.setQuestionNum(questionnaire.getQuestionNum() - 1);
+                questionnaireService.updateById(questionnaire);
+                //问卷其他问题改变序号
+                LambdaQueryWrapper<Question> deleteWrapper = new LambdaQueryWrapper<Question>();
+                deleteWrapper.eq(Question::getQuestionnaireId, questionnaireId).gt(Question::getNumber, number);
+                List<Question> list = questionService.list(deleteWrapper);
+                list.forEach(question -> {
+                    question.setNumber(question.getNumber() - 1);
+                    questionService.updateById(question);
+                });
+            }
+            //标记答案无效
+            inValidAnswer(questionId);
+            //删除所有选项
+           LambdaQueryWrapper<Selection> selectionWrapper = new LambdaQueryWrapper<>();
+           selectionWrapper.eq(Selection::getQuestionId,questionId);
+           List<Selection> selectionList = selectionService.list(selectionWrapper);
+           if(!selectionList.isEmpty()) {
+               selectionList.forEach(selection -> {
+                   selectionService.removeById(selection.getSelectionId());
+               });
+           }
+
+
                    return Result.success(questionId);
         }
         else
@@ -201,7 +264,13 @@ public Result getById(int id) {
     @CrossOrigin
     @PostMapping("/deleteSelection")
     public Result deleteSelection(int selectionId) {
+
         Selection oldSelection = selectionService.getById(selectionId);
+        Question question = questionService.getById(oldSelection.getQuestionId());
+        if(question.getSelectionNum()<=2)
+        {
+            return Result.fail(0,"选项只剩两个");
+        }
         if(selectionService.removeById(selectionId))
         {
             LambdaQueryWrapper<Selection> deleteWrapper = new LambdaQueryWrapper<>();
@@ -211,10 +280,12 @@ public Result getById(int id) {
                 selection.setPosition(selection.getPosition()-1);
                 selectionService.updateById(selection);
             });
-            Question question=questionService.getById(oldSelection.getQuestionId());
             question.setSelectionNum(question.getSelectionNum()-1);
-            if(questionService.updateById(question))
+            if(questionService.updateById(question)) {
+
+                    inValidAnswer(question.getQuestionId());
                 return Result.success(question);
+            }
             else
                 return Result.fail(2,"更新问题失败，请删除问题");
         }

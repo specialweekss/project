@@ -55,7 +55,6 @@ export default {
   },
   methods: {
     async fetchQuestionnaire() {
-
       const response = axios.get('http://localhost:8090/getById?id=' + this.id);
       this.theme = (await response).data.data.theme;
       const quesResponse = axios.get('http://localhost:8090/ListQuestionInIt?id=' + this.id);
@@ -90,15 +89,24 @@ export default {
         if(this.questions[index].type===2&&this.answers[index].length>0)
         {
           console.log(answer[0])
-          if(answer[0]!=='1'&&answer[0]!=='2'&&answer[0]!=='3'&&answer[0]!=='4'&&answer[0]!=='5'&&answer[0]!=='6'&&answer[0]!=='7'&&answer[0]!=='8'&&answer[0]!=='9'&&answer[0]!=='0'){
+          if((answer.length>1&&answer!=='10')||(answer[0]!=='1'&&answer[0]!=='2'&&answer[0]!=='3'&&answer[0]!=='4'&&answer[0]!=='5'&&answer[0]!=='6'&&answer[0]!=='7'&&answer[0]!=='8'&&answer[0]!=='9')){
             over=false;
-            alert('打分题'+index+'应输入1~10')
+            alert('打分题应输入1~10')
           }
         }
       })
       return over;
     },
     async commit(){
+      const update=await axios.get('http://localhost:8090/checkState?id='+this.id);
+      console.log(update)
+      if(update.data.code===400)
+      {
+
+          alert('问卷已截止或已不存在！')
+          this.close()
+          return
+      }
       if(!this.fillOver())
       {
         return;

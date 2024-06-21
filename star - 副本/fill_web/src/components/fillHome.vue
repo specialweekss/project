@@ -1,15 +1,21 @@
 <template>
   <div v-if="state===1">
-  <div class="page" v-if="!showPreFill">
+  <div class="page" v-if="!showPreFill&&!showRegister">
+
     <h1 id="welcome" >欢迎登录</h1>
     <img src="@/assets/img/登录图片.png" alt="图片" class="logo-image" />
     <div class="denglukuang">
       <input class="inputstring" type="text" placeholder="账号" v-model="userId" />
       <br/><br/>
       <input class="inputstring" type="password" placeholder="密码" v-model="password" />
+      <br/>
+      <a type="text" class="register-link" @click="registerOn">立即注册</a>
+      <br/>
       <button class="button" type="button" @click="login">登录</button>
     </div>
   </div>
+    <register v-if="showRegister" :go-home="goHome"></register>
+    <pre-fill v-if="showPreFill" :user-id="userId" :go-home="goHome" :questionnaire-id="questionnaireId"></pre-fill>
   </div>
 <div v-if="state===0">
   <h1 class="center">问卷未发布或不存在！</h1>
@@ -17,24 +23,27 @@
   <div v-if="state===2">
     <h1 class="center">问卷已截止！</h1>
   </div>
-  <pre-fill v-if="showPreFill" :user-id="userId" :go-home="goHome" :questionnaire-id="questionnaireId"></pre-fill>
+
 </template>
 
 <script>
 import preFill from "@/components/preFill.vue";
 import axios from "axios";
+import register from "@/components/registerPage.vue";
 export default {
   data() {
     return {
       password: '',
       showPreFill:false,
-      userId:null,
+      userId:'',
       type:null,
       questionnaireId:null,
-      state:0
+      state:0,
+      showRegister:false
     };
   },
   components:{
+    register,
     preFill
   },
   mounted() {
@@ -61,14 +70,54 @@ export default {
     },
     goHome(){
       this.showPreFill=false;
+      this.showRegister=false
+    },
+    registerOn(){
+      this.showRegister=true
+      console.log(this.showRegister)
     },
     async login() {
+
+     let idNum=Number(this.userId)
+      console.log(idNum)
+      if(this.password===''||this.userId==='')
+      {
+        alert('请输入账号密码！')
+        return;
+      }
+
+      else if(idNum.toString()!==this.userId)
+      {
+        alert('账号格式错误，应为账号id！')
+        return;
+      }
       const response=await axios.get('http://localhost:8090/LogIn?password='+this.password+'&userId='+this.userId)
       this.type=response.data.data.type
       console.log(response);
       if(response.data.code===400){ alert('账号或密码错误！');}
       else
-        this.showPreFill=true;
+      {
+        if(this.questionnaireId!==null) {
+          const update = await axios.get('http://localhost:8090/checkState?id=' + this.questionnaireId);
+
+          if(update.data.code===200)
+          {
+            this.showPreFill=true
+          }
+          else
+          {
+            if(update.data.data===2)
+            {
+              this.state=2
+            }
+            else
+              this.state=0
+          }
+        }
+        else
+          this.showPreFill=true
+
+      }
       // 这里可以使用axios或fetch等发起登录请求到后端接口
     },
   },
@@ -149,5 +198,19 @@ input {
 }
 .center{
   text-align: center;
+}
+
+.register-link {
+  position: relative;
+  left:700px;
+  top:150px;
+  transform: translateX(-50%);
+  margin-top: 1000px;
+  color: crimson;
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 25px;
 }
 </style>
