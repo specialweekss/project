@@ -1,24 +1,22 @@
 <template>
       <div class="border" >
-        <!-- 返回按钮 -->
+
         <el-button  type="text">
           <img src="../assets/img/返回.png" alt="返回" @click="goHome"/>
         </el-button>
 
 
-        <!-- 我的问卷按钮 -->
-        <button class="noUseButton" @click="my">
+
+        <button class="noUseButton" @click="questionnaire">
           <img src="@/assets/img/我的问卷.png" alt="图片" />
           <p class="bordertext">用户问卷</p>
         </button>
 
-        <!-- 个人资料按钮 -->
-        <button class="noUseButton" type="button" @click="personalOn">
+      <button class="noUseButton" type="button" @click="manageOn">
           <img src="../assets/img/个人资料.png" alt="图片" />
           <p class="bordertext">管理员资料</p>
         </button>
 
-        <!-- 填写记录按钮 -->
         <div class="usingButton" >
           <img src="../assets/img/填写记录.png" alt="图片" />
           <p class="bordertext">用户列表</p>
@@ -44,7 +42,7 @@
 import '@vuepic/vue-datepicker/dist/main.css'
 import axios from "axios";
 export default {
-  props:['recordOn','personalOn','my','goHome','userId'],
+  props:['manageOn','questionnaire','goHome','userId'],
   data(){
     return{
       users:[],
@@ -141,18 +139,6 @@ body {
   margin-left: 0%;
 }
 
-.dialog {
-  position: fixed;
-  z-index: 1000;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 20px;
-  border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  text-align: center;
-}
 
 .dialog button {
   margin-top: 10px;

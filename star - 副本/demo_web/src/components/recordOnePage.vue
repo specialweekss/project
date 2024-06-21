@@ -11,18 +11,19 @@
     </div>
     ------------------------------------------------------------------------------------------
     <h2>填写总次数：{{question.answerNum}}</h2>
-    <el-button v-if="!IsShowed(question)" type="primary" @click="recordOn(question)">展开</el-button>
+    <el-button v-if="!IsShowed(question)&&question.answerNum" type="primary" @click="recordOn(question)">展开</el-button>
     <div v-if="IsShowed(question)">
     <div v-for="(value,index) in answerForAll.at(question.number-1)" :key="index">
-      <div v-if="question.type===0||question.type===1">
+      <span v-if="question.type===0||question.type===1">
         <span>填写记录{{index+1}}：</span>
-        <span v-for="(answer,index) in value.answer" :key="index">
+      <span v-for="(answer,index) in value.answer" :key="index">
           {{getSelectionPosition(answer)}},
       </span>
-      </div>
-      <div v-else>
-        填写记录{{index+1}}：{{value.answer}}
-      </div>
+      </span>
+        <span v-else>
+          填写记录{{index+1}}：{{value.answer}}
+      </span>
+        <span v-if="!isValid(value)" style="color: red" >(已失效)</span>
     </div>
       <el-button  type="primary" @click="recordOff(question)">收回</el-button>
     </div>
@@ -90,6 +91,12 @@ export default {
           show=true;
       })
       return show;
+    },
+
+    isValid(answer)
+    {
+      console.log(answer)
+      return answer.isValid !== 0;
     },
     getQuestionType(type) {
       const types = {

@@ -6,9 +6,7 @@
 </template>
 
 <script>
-// import Example from '@/components/qusPage.vue';
 import Home from "@/components/homePage.vue";
-//import Msg from '@/components/homePage.vue'
 export default {
   components: {
     Home

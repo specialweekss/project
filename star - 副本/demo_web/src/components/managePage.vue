@@ -1,24 +1,21 @@
 <template>
   <div>
     <div class="border">
-      <!-- 返回按钮 -->
+
       <el-button  type="text">
         <img src="../assets/img/返回.png" alt="返回" @click="goHome"/>
       </el-button>
-      <!-- 创建问卷按钮 -->
 
-      <!-- 我的问卷按钮 -->
-      <button class="noUseButton" @click="my">
+      <button class="noUseButton" @click="questionnaire">
         <img src="@/assets/img/我的问卷.png" alt="图片" />
         <p class="bordertext">用户问卷</p>
       </button>
-      <!-- 填写记录按钮 -->
-      <!-- 个人资料按钮 -->
+
       <div class="usingButton" >
         <img src="@/assets/img/个人资料.png" alt="图片" />
         <p class="bordertext">管理员资料</p>
       </div>
-      <button class="noUseButton" @click="recordOn">
+      <button class="noUseButton" @click="userOn">
         <img src="@/assets/img/填写记录.png" alt="图片" />
         <p class="bordertext">用户列表</p>
       </button>
@@ -41,7 +38,7 @@
 import axios from "axios";
 
 export default {
-  props:['createOn','recordOn','my','goHome','userId'],
+  props:['userOn','questionnaire','goHome','userId'],
   data() {
     return {
       name: '',

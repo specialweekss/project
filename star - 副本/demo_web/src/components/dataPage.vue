@@ -13,20 +13,21 @@
     </div>
     ---------------------------------------------------------------
     <h3>填写总次数：{{question.answerNum}}</h3>
-    <el-button v-if="!IsShowed(question)" type="primary" @click="recordOn(question)">展开</el-button>
+    <el-button v-if="!IsShowed(question)&&question.answerNum" type="primary" @click="recordOn(question)">展开</el-button>
     <div v-if="IsShowed(question)">
     <br><div>填写记录：<br></div>
     <div v-for="(value,index) in answerForAll.at(question.number-1)" :key="index">
 
-      <div v-if="question.type===0||question.type===1">
+      <span v-if="question.type===0||question.type===1">
         <span>用户{{value.userId}}：</span>
       <span v-for="(answer,index) in value.answer" :key="index">
           {{getSelectionPosition(answer)}},
       </span>
-      </div>
-      <div v-else>
+      </span>
+      <span v-else>
           用户{{value.userId}}：{{value.answer}}
-      </div>
+      </span>
+      <span v-if="!isValid(value)" style="color: red" >(已失效)</span>
       </div>
       <el-button  type="primary" @click="recordOff(question)">收回</el-button>
     </div>
@@ -78,6 +79,7 @@ export default {
       return show;
     },
     async fetchQuestionnaire() {
+
       const response = axios.get(' http://localhost:8090/getById?id=' + this.id);
       this.theme = (await response).data.data.theme;
       this.state=(await response).data.data.state;
@@ -103,9 +105,12 @@ export default {
                 this.selectionForAll[question.number - 1] = response.data.data;
               })
         })
-        console.log(this.selectionForAll);
-        console.log(this.answerForAll);
       }
+    },
+    isValid(answer)
+    {
+      console.log(answer)
+      return answer.isValid !== 0;
     },
     getQuestionType(type) {
       const types = {

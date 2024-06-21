@@ -1,6 +1,6 @@
 <template>
 <el-button type="primary" @click="close">退出</el-button>
-  <h1>{{questionnaire.theme}}：【{{getState(questionnaire.state)}}】</h1>
+  <h1>{{questionnaire.theme}}【{{getState(questionnaire.state)}}】</h1>
   <h2 v-if="questionnaire.state===1">
     发布时间：{{questionnaire.releaseTime}} <br> 截止时间：{{ questionnaire.endTime}}
   </h2>
@@ -84,9 +84,9 @@ export default {
       types:[0,1,2,3],
       type:0,
       questionnaire: [],
-      title: "",
+      title: '问题标题',
       selectionsForAll:[],
-      content:"选项",
+      content:'选项',
       showModSelection:false,
       beModSelectionId:null
     };
@@ -98,13 +98,17 @@ export default {
   },
   methods: {
     async fetchQuestionnaire() {
+      const update=await axios.get('http://localhost:8090/checkState?id='+this.id);
+      console.log(update)
+      this.title = "问题标题";
+      this.content="选项"
+      this.type=0;
+      this.necessary=0;
       console.log(this.creatorId);
         const response = await axios.get(`http://localhost:8090/getById?id=${this.id}`);
         this.questionnaire = response.data.data;
       let releaseTime=new Date(this.questionnaire.releaseTime)
       let endTime=new Date(this.questionnaire.endTime)
-
-      console.log(releaseTime)
       this.questionnaire.releaseTime=releaseTime;
       this.questionnaire.endTime=endTime
         console.log(response)
@@ -176,10 +180,12 @@ export default {
     },
    async addOn(){
      this.showAdd=true;
+     this.showMod=false;
+     this.showModSelection=false;
    },
     async addQuestion() {
       // 确单证问卷ID有效且有新问题标题
-      try {
+
         const questionData = {
           "title": this.title, // 问题标题
           "necessary": this.necessary, // 假设默认不是必填
@@ -189,20 +195,16 @@ export default {
         // 发送请求添加问题
         const response = await axios.post(`http://localhost:8090/saveQuestion?id=`+this.id,questionData);
 
-        if (response.status === 200) {
+        if (response.data.code === 200) {
           console.log("问题添加成功");
-          this.title = "";
-          this.type=0;
-          this.necessary=0;
+
           this.showAdd=false;
             await this.fetchQuestionnaire(); // 刷新问卷信
         } else {
-          console.error("添加问题失败", response.data);
-        }
-      } catch (error) {
-        console.error("添加问题时出错", error);
+          alert('问题无标题！')
 
-      }
+        }
+
 
     },
     async deleteQuestion(questionId){
@@ -214,10 +216,14 @@ console.log(questionId);
     modOn(question)
     {
       this.showMod=true;
+      this.showAdd=false;
+      this.showModSelection=false;
       this.beModQuestionId=question.questionId;
       this.necessary=question.necessary;
       this.title=question.title;
       this.type=question.type
+      this.showAdd=false;
+      this.showModSelection=false;
     },
     beMod(questionId)
     {
@@ -228,6 +234,7 @@ console.log(questionId);
     },
     async modQuestion(questionId)
     {
+
         const questionData = {
           "title": this.title, // 问题标题
           "necessary": this.necessary, // 假设默认不是必填
@@ -236,7 +243,12 @@ console.log(questionId);
         console.log(questionData);
         // 发送请求添加问题
         const response = await axios.post(`http://localhost:8090/modQuestion?questionId=`+questionId,questionData);
-
+      if (response.data.code === 200) {
+        console.log("问题修改成功");// 刷新问卷信
+      } else {
+        alert('问题无标题！')
+        return
+      }
 
           console.log(response);
           this.title = "";
@@ -261,23 +273,43 @@ console.log(questionId);
   async deleteSelection(selectionId){
       const  response=await axios.post('http://localhost:8090/deleteSelection?selectionId='+selectionId);
       console.log(response)
+    if(response.data.code===400)
+    {
+      if(response.data.data===0)
+      {
+        alert('选择题需存在至少两个选项!')
+        return;
+      }
+    }
       await this.fetchQuestionnaire();
   },
   async  addSelection(questionId) {
     const response = await axios.post('http://localhost:8090/saveSelection?questionId=' + questionId, {"content": "选项"});
     console.log(response);
+    this.showModSelection=false;
+    this.showAdd=false;
+    this.showMod=false;
     await this.fetchQuestionnaire();
   },
     modSelectionOn(selection)
     {
       this.showModSelection=true;
+      this.showAdd=false;
+      this.showMod=false;
       this.beModSelectionId=selection.selectionId;
    this.content=selection.content
     },
     async modSelection(selectionId)
     {
+
       const response=await axios.post('http://localhost:8090/modSelection?selectionId='+selectionId+'&content='+this.content);
       console.log(response);
+      if (response.data.code === 200) {
+        console.log("选项修改成功");// 刷新问卷信
+      } else {
+        alert('选项无文本！')
+        return
+      }
       this.showModSelection=false;
       await this.fetchQuestionnaire();
     }

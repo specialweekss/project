@@ -39,8 +39,8 @@
             <el-button type="text" class="edit" @click="editOn(value)">编辑</el-button>
             <img src="../assets/img/删除.png" alt="图片" @click="Delete(value)" />
             <el-button type="text" class="edit" @click="Delete(value)">删除</el-button>
-            <img src="../assets/img/发布.png" alt="图片" @click="OnPublishDialog" />
-            <el-button type="text" class="edit" @click="OnPublishDialog">发布</el-button>
+            <img src="../assets/img/发布.png" alt="图片" @click="OnPublishDialog(value)" />
+            <el-button type="text" class="edit" @click="OnPublishDialog(value)">发布</el-button>
             <div v-if="publishDialog" class="dialog">
               <div>请输入截止时间</div>
               <el-date-picker v-model="endTime"    type="datetime" /><br>
@@ -89,7 +89,7 @@ export default {
   props:['userId','goHome'],
   data(){
     return{
-      releaseTime : new Date(),
+      releaseTime :null,
       endTime : null,
       showCreate:false,
       showPersonal:false,
@@ -117,22 +117,29 @@ export default {
   },
   methods: {
     async getLink(questionnaire){
+      if(await this.deletedByManager(questionnaire.id)===-1)
+        return
       const response=await axios.get('http://localhost:8090/getIp');
       const ip=response.data;
-      this.link='http://'+ip+':8081/?questionnaireId='+questionnaire.id;
+      this.link='http://'+ip+':8080/?questionnaireId='+questionnaire.id;
       console.log(this.link)
       this.showLink=true;
     },
-    linkOff(){
+    async linkOff(){
+   
       this.showLink=false;
     },
-    dataOn(questionnaire){
+    async dataOn(questionnaire){
+      if(await this.deletedByManager(questionnaire.id)===-1)
+        return
       this.questionnaireId=questionnaire.id;
       console.log(questionnaire.id);
       this.showData=true;
     },
-    editOn(questionnaire)
+    async editOn(questionnaire)
     {
+      if(await this.deletedByManager(questionnaire.id)===-1)
+        return
       this.showEdit=true;
       this.questionnaireId=questionnaire.id;
       console.log(questionnaire.id);
@@ -142,10 +149,30 @@ export default {
     },
     editOff(){
       this.showEdit=false;
+      this.fetchQuestionnaire();
+    },
+    async deletedByManager(id)
+    {
+      const update=await axios.get('http://localhost:8090/checkState?id='+id);
+      console.log(update)
+      if(update.data.code===400)
+      {
+        if(update.data.data===-1)
+        {
+          alert('问卷已被系统删除！')
+          await this.fetchQuestionnaire()
+          return -1;
+        }
+      }
+      else
+      {
+        return update.data.data;
+      }
     },
     async fetchQuestionnaire(){
       this.questionnaires=[];
       const response=await axios.get('http://localhost:8090/ListByUser?userId='+this.userId)
+      console.log(response)
       const list =response.data.data;
       if(response.data.code===400)
         this.questionnaires=[];
@@ -155,18 +182,43 @@ export default {
         })
     },
     async Delete(questionnaire){
+      if(await this.deletedByManager(questionnaire.id)===-1)
+        return
       const response=await axios.post('http://localhost:8090/delete?id='+questionnaire.id)
       console.log(response)
       await this.fetchQuestionnaire();
     },
-    OnPublishDialog(){
+   async OnPublishDialog(questionnaire){
+      console.log(questionnaire.questionNum)
+      if(!questionnaire.questionNum)
+      {
+        alert('问卷问题为空！')
+        return
+      }
+      const update=await axios.get('http://localhost:8090/checkState?id='+questionnaire.id);
+      if(update.data.code===200)
+      {
+        alert('问卷已发布！')
+        return
+      }
+      else if (update.data.data===-1)
+      {
+        alert('问卷已被系统删除！')
+        await this.fetchQuestionnaire()
+        return
+      }
       this.publishDialog = true;
     },
     OffPublishDialog(){
       this.publishDialog = false;
     },
     async publish(questionnaire){
+      if(await this.deletedByManager(questionnaire.id)===-1) {
+        this.publishDialog = false;
+        return
+      }
       let commit;
+      this.releaseTime=new Date()
       let releaseTime=Date.parse(this.releaseTime),
           endTime=Date.parse(this.endTime)
       if(releaseTime>=endTime)
@@ -184,16 +236,26 @@ export default {
       const response=await axios.post('http://localhost:8090/publish?',commit)
       console.log(response)
       this.publishDialog = false;
+      await this.fetchQuestionnaire();
     },
     async end(questionnaire){
-      if(questionnaire.state===0)
-      {
-        alert('问卷未发布！')
-        return;
+      if(await this.deletedByManager(questionnaire.id)===-1)
+        return
+      const update=await axios.get('http://localhost:8090/checkState?id='+questionnaire.id);
+      console.log(update)
+      if(update.data.code===400) {
+        if (update.data.data === 0) {
+          alert('问卷未发布！')
+          return;
+        } else {
+          alert('问卷已截止！')
+          return;
+        }
       }
-      const response=await axios.post('http://localhost:8090/end?id='+questionnaire.id)
-      console.log(response)
+     await axios.post('http://localhost:8090/end?id='+questionnaire.id)
+
       this.endDialog=true;
+      await this.fetchQuestionnaire();
     },
     closeEndDialog(){
       this.endDialog=false;
@@ -216,13 +278,13 @@ export default {
           this.showCreate=false,
           this.showPersonal=false
     },
-    MyOn(){
+   async MyOn(){
       console.log(1);
       this.showMyQuestionnaire=true;
       this.showRecord=false;
           this.showCreate=false;
           this.showPersonal=false;
-      this.fetchQuestionnaire();
+      await this.fetchQuestionnaire();
     },
     handleMyQuestionnaireClick() {
       console.log("我的问卷被点击");

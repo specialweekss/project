@@ -34,9 +34,13 @@
     <main>
       <div v-for="(value,index) in records" :key="index">
       <div class="recordMessage">
-        <p class="Qname">问卷id：{{value.questionnaireId}}</p>
-        <img src="@/assets/img/查看.png" alt="图片" @click="recordOn(value)" />
-        <a class="check" @click="recordOn(value)">查看</a>
+        <div class="Qname">问卷id：{{value.questionnaireId}} <br>
+        问卷名：{{value.theme}}<br>
+          填写日期：{{value.recordTime}}
+        </div>
+        <img src="@/assets/img/查看.png" alt="图片" @click="recordOn(value.questionnaireId)" />
+        <div class="check" @click="recordOn(value.questionnaireId)">查看</div>
+        <div class="date"> </div>
       </div>
         <br><br>
       </div>
@@ -56,7 +60,7 @@ export default {
     return {
       records: [],
       showRecord:false,
-      questionnaireId:null
+      questionnaireId:null,
     }
   },
   components:{
@@ -75,20 +79,50 @@ this.fetchRecord()
         this.records=[];
       else {
         list.forEach(record => {
+          let time=new Date( record.recordTime)
+         record.recordTime=time.getFullYear()+'-'+time.getMonth()+'-'+time.getDate()+' '+time.getHours()+':'+time.getUTCMinutes()+':'+time.getSeconds()
           this.records.push(record);
+          
         })
       }
       console.log(this.records);
     },
-    recordOn(value)
+    async deletedByManager(id)
     {
-      this.questionnaireId=value.questionnaireId
+      const update=await axios.get('http://localhost:8090/checkState?id='+id);
+      console.log(update)
+      if(update.data.code===400)
+      {
+        if(update.data.data===-1)
+        {
+          alert('问卷已被系统删除！仅记录时间与问卷名保留')
+          await this.fetchRecord()
+          return -1;
+        }
+      }
+      else
+      {
+        return update.data.data;
+      }
+    },
+    async recordOn(questionnaireId)
+    {
+      if(await this.deletedByManager(questionnaireId)===-1)
+        return
+      const response=await axios.get('http://localhost:8090/getById?id='+questionnaireId)
+      console.log(response.data.data)
+       if(response.data.data.questionNum===0)
+       {
+         alert('问卷问题已被全部删除！')
+         return;
+       }
+      this.questionnaireId=questionnaireId
       this.showRecord=true;
     },
     recordoff()
     {
       this.showRecord=false;
-    }
+    },
   }
 }
 </script>
@@ -118,7 +152,7 @@ this.fetchRecord()
 
 .check {
   padding-top: 20px;
-  width: 60px;
+  width: 70px;
   font-size: 30px;
   color: rgba(121, 72, 234, 1);
 }
