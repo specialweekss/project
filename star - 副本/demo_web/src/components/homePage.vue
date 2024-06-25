@@ -41,6 +41,7 @@ export default {
     register
   },
   methods: {
+
     goHome(){
       this.showMy=false
       this.showManage=false
@@ -64,7 +65,7 @@ export default {
        alert('账号格式错误，应为账号id！')
        return;
      }
-      const response=await axios.get('http://localhost:8090/LogIn?password='+this.password+'&userId='+this.userId)
+      const response=await axios.get(window.Ip+'/LogIn?password='+this.password+'&userId='+this.userId)
       this.type=response.data.data.type
      console.log(response);
       if(response.data.code===400){ alert('账号或密码错误！');}

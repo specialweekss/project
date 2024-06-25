@@ -7,7 +7,7 @@
 
     <!-- 创建问卷区域 -->
     <div class="create-questionnaire">
-      <div class="usingButton" @click="createQuestionnaire">
+      <div class="usingButton" >
         <img src="@/assets/img/创建问卷.png" alt="图片" />
         <p class="bordertext">创建问卷</p>
       </div>
@@ -43,6 +43,7 @@
 
 <script>
 import axios from "axios";
+import check from "@/components/MyQuestionnaire.vue"
 export default {
   props:['recordOn','personalOn','my','goHome','userId'],
   data() {
@@ -51,15 +52,16 @@ export default {
     };
   },
   methods: {
-    createQuestionnaire() {
-      // 逻辑处理，例如弹窗提示创建问卷的功能尚未实现
-      alert('创建问卷功能即将上线！');
-    },
     async saveQuestionnaire() {
+      if(!await check.methods.checkUser(this.userId))
+      {
+        this.goHome();
+        return;
+      }
       // 模拟保存问卷标题的逻辑
       if (this.questionnaireTitle.trim() !== '') {
         console.log('保存问卷标题:', this.questionnaireTitle);
-        const response = await axios.post('http://localhost:8090/save',{
+        const response = await axios.post(window.Ip+'/save',{
           "theme":this.questionnaireTitle,
           "creatorId":this.userId
         });

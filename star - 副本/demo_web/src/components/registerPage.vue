@@ -62,14 +62,23 @@ export default {
   },
   methods: {
    async register() {
-      // 处理表单提交逻辑
-      const response=await axios.post('http://localhost:8090/Register?username='+this.username+'&password='+this.password)
+
+      // 处理表单提交逻辑/ 输出内网 IP 地址
+
+      const response=await axios.post(window.Ip+'/Register?username='+this.username+'&password='+this.password)
       // 可以在此处添加更多的业务逻辑，例如验证和API调用
      console.log(response.data)
-     this.userId=response.data.data
-    if(response.data.code===200) {alert('注册成功,账号ID为'+this.userId+'  账号密码为'+this.password)
-      this.goHome()}
-     else alert('昵称或密码格式错误')
+     if(response.data.code===200) {
+       this.userId=response.data.data
+       alert('注册成功,账号ID为'+this.userId+'  账号密码为'+this.password
+       )
+       this.goHome()}
+   else if(response.data.data===0)
+       alert('密码格式错误！')
+     else if(response.data.data===-1)
+       alert('请将昵称和密码全部输入！')
+     else
+       alert('昵称已存在！')
    }
   }
 };

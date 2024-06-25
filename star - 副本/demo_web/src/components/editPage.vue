@@ -1,79 +1,82 @@
 <template>
-<el-button type="primary" @click="close">退出</el-button>
-  <h1>{{questionnaire.theme}}【{{getState(questionnaire.state)}}】</h1>
+  <el-button type="primary" @click="close" class="theButton">退出</el-button>
+  <h1>{{questionnaire.theme}}：【{{getState(questionnaire.state)}}】</h1>
   <h2 v-if="questionnaire.state===1">
     发布时间：{{questionnaire.releaseTime}} <br> 截止时间：{{ questionnaire.endTime}}
   </h2>
   ---------------------------------------------------------<br>
-    <div v-for="question in questions" :key="question.number" >
+  <div v-for="question in questions" :key="question.number" >
 
-      问题{{question.number }}. {{question.title}} -{{getQuestionType(question.type)}} -{{getNecessary(question.necessary)}}
+    问题{{question.number }}. {{question.title}} -{{getQuestionType(question.type)}} -{{getNecessary(question.necessary)}}
 
-        <el-button type="text"  class="delete-button" @click="deleteQuestion(question.questionId)" >删除</el-button>
-      <el-button type="text"   @click="modOn(question)">修改</el-button>
-      <div v-if="showMod&&beMod(question.questionId)">
-        <form @submit.prevent="handleSubmit">
-          <input v-model="title" placeholder="问题标题" required><br>
-          <div>是否必填：
-            <label>
-              <input type="radio" v-model="necessary" value="1" > 必填
-            </label>
-            <label>
-              <input type="radio" v-model="necessary" value="0"> 非必填
-            </label><br>
-          </div>
-          <!-- 这里可以添加更多关于问题的输入项 -->
-        </form>
-        <el-button v-if="showMod" type="primary" @click="modQuestion(question.questionId)">确定</el-button>
-      </div>
-      <div v-if="isChoice(question)">
-        <div v-for="selection in selectionsForAll.at(question.number-1)" :key="selection.position">
-          选项{{getSelectionPosition(selection.position)}}.{{selection.content}}
-          <el-button type="text" class="delete-button" @click="deleteSelection(selection.selectionId)">删除</el-button>
-          <el-button type="text" @click="modSelectionOn(selection)">修改</el-button>
-          <div v-if="showModSelection&&selection.selectionId===beModSelectionId">
-            <input v-model="content" placeholder="选项标题" required><br>
-            <el-button type="primary" @click="modSelection(selection.selectionId)">确定</el-button>
-          </div>
+    <el-button type="text"  class="delete-button" @click="deleteQuestion(question.questionId)" >删除</el-button>
+    <el-button type="text"   @click="modOn(question)">修改</el-button>
+    <div v-if="showMod&&beMod(question.questionId)">
+      <form @submit.prevent="handleSubmit">
+        <input  v-model="title" placeholder="问题标题" required><br>
+        <div>是否必填：
+          <label>
+            <input type="radio" v-model="necessary" value="1" > 必填
+          </label>
+          <label>
+            <input type="radio" v-model="necessary" value="0"> 非必填
+          </label><br>
         </div>
-        <el-button type="text" @click="addSelection(question.questionId)">添加选项</el-button>
+        <!-- 这里可以添加更多关于问题的输入项 -->
+      </form>
+      <el-button v-if="showMod" type="primary" @click="modQuestion(question.questionId)">确定</el-button>
+    </div>
+    <div v-if="isChoice(question)">
+      <div v-for="selection in selectionsForAll.at(question.number-1)" :key="selection.position">
+        选项{{getSelectionPosition(selection.position)}}.{{selection.content}}
+        <el-button type="text" class="delete-button" @click="deleteSelection(selection.selectionId)">删除</el-button>
+        <el-button type="text" @click="modSelectionOn(selection)">修改</el-button>
+        <div v-if="showModSelection&&selection.selectionId===beModSelectionId">
+          <input v-model="content" placeholder="选项标题" required><br>
+          <el-button type="primary" @click="modSelection(selection.selectionId)">确定</el-button>
+        </div>
       </div>
+      <el-button type="text" @click="addSelection(question.questionId)">添加选项</el-button>
+    </div>
 
     <br>
-      ---------------------------------------------------------
-    </div>
+    ---------------------------------------------------------
+  </div>
 
   <!-- 添加问题按钮 -->
-  <el-button type="primary" @click="addOn">添加问题</el-button>
+  <el-button type="primary" @click="addOn" class="theButton">添加问题</el-button>
+  <br><br><br>
   <div v-if="showAdd">
-  <form @submit.prevent="handleSubmit">
-    <input v-model="title" placeholder="问题标题" required><br>
-    <div>是否必填：
-    <label>
-      <input type="radio" v-model="necessary" value="1" > 必填
-    </label>
-    <label>
-      <input type="radio" v-model="necessary" value="0"> 非必填
-    </label><br>
-    </div>
-    <div>问题类型：
-    <select v-model="type">
-      <option v-for="(value, key) in types" :key="key" :value="key">{{ getQuestionType(value) }}</option>
-    </select>
-    </div>
-    <!-- 这里可以添加更多关于问题的输入项 -->
-  </form>
-    <el-button v-if="showAdd" type="primary" @click="addQuestion">确定</el-button>
+    <form @submit.prevent="handleSubmit">
+      <input class="cin" v-model="title" placeholder="问题标题" required><br><br>
+      <div>是否必填：
+        <label>
+          <input type="radio" v-model="necessary" value="1" > 必填
+        </label>
+        <label>
+          <input type="radio" v-model="necessary" value="0"> 非必填
+        </label><br><br>
+      </div>
+      <div>问题类型：
+        <select v-model="type" class="cin">
+          <option v-for="(value, key) in types" :key="key" :value="key">{{ getQuestionType(value) }}</option>
+        </select>
+      </div>
+      <br><br>
+      <!-- 这里可以添加更多关于问题的输入项 -->
+    </form>
+    <el-button v-if="showAdd" type="primary" @click="addQuestion" class="theButton">确定</el-button>
 
 
   </div>
 </template>>
 
+
 <script>
 import axios from "axios";
-
+import check from '@/components/MyQuestionnaire.vue'
 export default {
-  props: ["id", "creatorId","close"],
+  props: ["id", "userId","close"],
   data() {
     return {
       showMod:false,
@@ -98,14 +101,28 @@ export default {
   },
   methods: {
     async fetchQuestionnaire() {
-      const update=await axios.get('http://localhost:8090/checkState?id='+this.id);
+      if(!await check.methods.checkUser(this.userId))
+      {
+        this.close();
+        return;
+      }
+      const update=await axios.get(window.Ip+'/checkState?id='+this.id);
+      if(update.data.code===400)
+      {
+        if(update.data.data===-1)
+        {
+          alert('问卷已被系统删除！')
+          this.close();
+          return
+        }
+      }
       console.log(update)
       this.title = "问题标题";
       this.content="选项"
       this.type=0;
       this.necessary=0;
       console.log(this.creatorId);
-        const response = await axios.get(`http://localhost:8090/getById?id=${this.id}`);
+        const response = await axios.get(window.Ip+'/getById?id='+this.id);
         this.questionnaire = response.data.data;
       let releaseTime=new Date(this.questionnaire.releaseTime)
       let endTime=new Date(this.questionnaire.endTime)
@@ -113,7 +130,7 @@ export default {
       this.questionnaire.endTime=endTime
         console.log(response)
       this.questions=[];
-      await axios.get('http://localhost:8090/ListQuestionInIt?id='+this.id)
+      await axios.get(window.Ip+'/ListQuestionInIt?id='+this.id)
           .then(response=>{
             if(response.data.code===200) {
               const list = response.data.data;
@@ -130,7 +147,7 @@ export default {
       this.selectionsForAll=[];
       const list=this.questions
      list.forEach(question=>{
-         axios.get('http://localhost:8090/ListSelectionInIt?questionId='+question.questionId)
+         axios.get(window.Ip+'/ListSelectionInIt?questionId='+question.questionId)
              .then(response=>{
                this.selectionsForAll[question.number-1]=response.data.data;
                });
@@ -179,13 +196,42 @@ export default {
       return states[necessary];
     },
    async addOn(){
+     if(!await check.methods.checkUser(this.userId))
+     {
+       this.close();
+       return;
+     }
+     const update=await axios.get(window.Ip+'/checkState?id='+this.id);
+     if(update.data.code===400)
+     {
+       if(update.data.data===-1)
+       {
+         alert('问卷已被系统删除！')
+         this.close();
+         return
+       }
+     }
      this.showAdd=true;
      this.showMod=false;
      this.showModSelection=false;
    },
     async addQuestion() {
       // 确单证问卷ID有效且有新问题标题
-
+      if(!await check.methods.checkUser(this.userId))
+      {
+        this.close();
+        return;
+      }
+      const update=await axios.get(window.Ip+'/checkState?id='+this.id);
+      if(update.data.code===400)
+      {
+        if(update.data.data===-1)
+        {
+          alert('问卷已被系统删除！')
+          this.close();
+          return
+        }
+      }
         const questionData = {
           "title": this.title, // 问题标题
           "necessary": this.necessary, // 假设默认不是必填
@@ -193,7 +239,7 @@ export default {
         };
         console.log(questionData);
         // 发送请求添加问题
-        const response = await axios.post(`http://localhost:8090/saveQuestion?id=`+this.id,questionData);
+        const response = await axios.post(window.Ip+'/saveQuestion?id='+this.id,questionData);
 
         if (response.data.code === 200) {
           console.log("问题添加成功");
@@ -208,13 +254,44 @@ export default {
 
     },
     async deleteQuestion(questionId){
+
+      if(!await check.methods.checkUser(this.userId))
+      {
+        this.close();
+        return;
+      }
+      const update=await axios.get(window.Ip+'/checkState?id='+this.id);
+      if(update.data.code===400)
+      {
+        if(update.data.data===-1)
+        {
+          alert('问卷已被系统删除！')
+          this.close();
+          return
+        }
+      }
 console.log(questionId);
-      const response = await axios.post(`http://localhost:8090/deleteQuestion?questionId=`+questionId);
+      const response = await axios.post(window.Ip+'/deleteQuestion?questionId='+questionId);
       console.log(response);
       await this.fetchQuestionnaire();
     },
-    modOn(question)
+   async modOn(question)
     {
+      if(!await check.methods.checkUser(this.userId))
+      {
+        this.close();
+        return;
+      }
+      const update=await axios.get(window.Ip+'/checkState?id='+this.id);
+      if(update.data.code===400)
+      {
+        if(update.data.data===-1)
+        {
+          alert('问卷已被系统删除！')
+          this.close();
+          return
+        }
+      }
       this.showMod=true;
       this.showAdd=false;
       this.showModSelection=false;
@@ -234,7 +311,21 @@ console.log(questionId);
     },
     async modQuestion(questionId)
     {
-
+      if(!await check.methods.checkUser(this.userId))
+      {
+        this.close();
+        return;
+      }
+      const update=await axios.get(window.Ip+'/checkState?id='+this.id);
+      if(update.data.code===400)
+      {
+        if(update.data.data===-1)
+        {
+          alert('问卷已被系统删除！')
+          this.close();
+          return
+        }
+      }
         const questionData = {
           "title": this.title, // 问题标题
           "necessary": this.necessary, // 假设默认不是必填
@@ -242,7 +333,7 @@ console.log(questionId);
         };
         console.log(questionData);
         // 发送请求添加问题
-        const response = await axios.post(`http://localhost:8090/modQuestion?questionId=`+questionId,questionData);
+        const response = await axios.post(window.Ip+'/modQuestion?questionId='+questionId,questionData);
       if (response.data.code === 200) {
         console.log("问题修改成功");// 刷新问卷信
       } else {
@@ -261,6 +352,7 @@ console.log(questionId);
 
     isChoice(question)
     {
+
      if(question.type===1||question.type===0)
       {
         return 1;
@@ -271,7 +363,22 @@ console.log(questionId);
 
     },
   async deleteSelection(selectionId){
-      const  response=await axios.post('http://localhost:8090/deleteSelection?selectionId='+selectionId);
+    if(!await check.methods.checkUser(this.userId))
+    {
+      this.close();
+      return;
+    }
+    const update=await axios.get(window.Ip+'/checkState?id='+this.id);
+    if(update.data.code===400)
+    {
+      if(update.data.data===-1)
+      {
+        alert('问卷已被系统删除！')
+        this.close();
+        return
+      }
+    }
+      const  response=await axios.post(window.Ip+'/deleteSelection?selectionId='+selectionId);
       console.log(response)
     if(response.data.code===400)
     {
@@ -284,15 +391,45 @@ console.log(questionId);
       await this.fetchQuestionnaire();
   },
   async  addSelection(questionId) {
-    const response = await axios.post('http://localhost:8090/saveSelection?questionId=' + questionId, {"content": "选项"});
+    if(!await check.methods.checkUser(this.userId))
+    {
+      this.close();
+      return;
+    }
+    const update=await axios.get(window.Ip+'/checkState?id='+this.id);
+    if(update.data.code===400)
+    {
+      if(update.data.data===-1)
+      {
+        alert('问卷已被系统删除！')
+        this.close();
+        return
+      }
+    }
+    const response = await axios.post(window.Ip+'/saveSelection?questionId=' + questionId, {"content": "选项"});
     console.log(response);
     this.showModSelection=false;
     this.showAdd=false;
     this.showMod=false;
     await this.fetchQuestionnaire();
   },
-    modSelectionOn(selection)
+   async modSelectionOn(selection)
     {
+      if(!await check.methods.checkUser(this.userId))
+      {
+        this.close();
+        return;
+      }
+      const update=await axios.get(window.Ip+'/checkState?id='+this.id);
+      if(update.data.code===400)
+      {
+        if(update.data.data===-1)
+        {
+          alert('问卷已被系统删除！')
+          this.close();
+          return
+        }
+      }
       this.showModSelection=true;
       this.showAdd=false;
       this.showMod=false;
@@ -301,8 +438,22 @@ console.log(questionId);
     },
     async modSelection(selectionId)
     {
-
-      const response=await axios.post('http://localhost:8090/modSelection?selectionId='+selectionId+'&content='+this.content);
+      if(!await check.methods.checkUser(this.userId))
+      {
+        this.close();
+        return;
+      }
+      const update=await axios.get(window.Ip+'/checkState?id='+this.id);
+      if(update.data.code===400)
+      {
+        if(update.data.data===-1)
+        {
+          alert('问卷已被系统删除！')
+          this.close();
+          return
+        }
+      }
+      const response=await axios.post(window.Ip+'/modSelection?selectionId='+selectionId+'&content='+this.content);
       console.log(response);
       if (response.data.code === 200) {
         console.log("选项修改成功");// 刷新问卷信
@@ -334,6 +485,21 @@ console.log(questionId);
   position: relative;
   display: flex;
 }
+.theButton{
+  left: 383px;
+  top: 470px;
+  width: 220px;
+  height: 90px;
+  opacity: 1;
+  border-radius: 40px;
+  background: rgba(42, 130, 228, 1);
+
+}
+.cin{
+  width: 200px;
+  height: 60px;
+  border-radius: 30px;
+}
 .recordMessage img{
   margin-left: 50px;
 }
@@ -343,8 +509,8 @@ console.log(questionId);
   font-size: 14px;
   color: #007bff;
   text-decoration: none;
-  border-radius: 4px;
   transition: background-color 0.3s ease;
+  border-radius: 30px;
 }
 
 .recordMessage a:hover {

@@ -31,16 +31,19 @@
         <p class="bordertext">填写记录</p>
       </div>
     </div>
-    <main>
+    <main class="scrollable-container">
       <div v-for="(value,index) in records" :key="index">
+        <div v-if="value.isDeleted===0">
       <div class="recordMessage">
         <div class="Qname">问卷id：{{value.questionnaireId}} <br>
         问卷名：{{value.theme}}<br>
           填写日期：{{value.recordTime}}
         </div>
+        <img src="../assets/img/删除.png" alt="图片" @click="Delete(value.questionnaireId)" />
+        <div class="check" @click="Delete(value.questionnaireId)">删除</div>
         <img src="@/assets/img/查看.png" alt="图片" @click="recordOn(value.questionnaireId)" />
         <div class="check" @click="recordOn(value.questionnaireId)">查看</div>
-        <div class="date"> </div>
+      </div>
       </div>
         <br><br>
       </div>
@@ -54,6 +57,7 @@
 <script>
 import axios from "axios";
 import recordOne from "@/components/recordOnePage.vue";
+import myQuestionnaire from "@/components/MyQuestionnaire.vue";
 export default {
   props:['createOn','personalOn','my','goHome','userId'],
   data(){
@@ -70,9 +74,26 @@ export default {
 this.fetchRecord()
   },
   methods: {
+    async Delete(questionnaireId){
+      if(!await myQuestionnaire.methods.checkUser(this.userId))
+      {
+        this.goHome();
+        return;
+      }
+      if(await this.deletedByManager(questionnaireId)===-1)
+        return;
+      const response=await axios.post('http://localhost:8090/deleteRecord?userId='+this.userId+'&questionnaireId='+questionnaireId);
+      console.log(response);
+      alert('记录已删除')
+    },
     async fetchRecord(){
+      if(!await myQuestionnaire.methods.checkUser(this.userId))
+      {
+        this.goHome();
+        return;
+      }
       this.records=[];
-      const response=await axios.get('http://localhost:8090/ListRecordByUser?userId='+this.userId);
+      const response=await axios.get(window.Ip+'/ListRecordByUser?userId='+this.userId);
 
       const list =response.data.data;
       if(response.data.code===400)
@@ -89,7 +110,8 @@ this.fetchRecord()
     },
     async deletedByManager(id)
     {
-      const update=await axios.get('http://localhost:8090/checkState?id='+id);
+
+      const update=await axios.get(window.Ip+'/checkState?id='+id);
       console.log(update)
       if(update.data.code===400)
       {
@@ -107,9 +129,14 @@ this.fetchRecord()
     },
     async recordOn(questionnaireId)
     {
+      if(!await myQuestionnaire.methods.checkUser(this.userId))
+      {
+        this.goHome();
+        return;
+      }
       if(await this.deletedByManager(questionnaireId)===-1)
         return
-      const response=await axios.get('http://localhost:8090/getById?id='+questionnaireId)
+      const response=await axios.get(window.Ip+'/getById?id='+questionnaireId)
       console.log(response.data.data)
        if(response.data.data.questionNum===0)
        {
@@ -119,8 +146,13 @@ this.fetchRecord()
       this.questionnaireId=questionnaireId
       this.showRecord=true;
     },
-    recordoff()
+   async  recordoff()
     {
+      if(!await myQuestionnaire.methods.checkUser(this.userId))
+      {
+        this.goHome();
+        return;
+      }
       this.showRecord=false;
     },
   }
@@ -133,10 +165,18 @@ this.fetchRecord()
 @import '@/css/noUseButton.css';
 @import '@/css/usingButton.css';
 @import '@/css/buttonHover.css';
-
-.recordMessage {
-  left: 550px;
+.scrollable-container  {
+  left: 540px;
+  height: 1100px;
   top: -1100px;
+  width: 1400px;
+  position: relative;
+  max-height: 120vh;
+  overflow-y: auto;
+}
+.recordMessage {
+  left: 0px;
+  top: 00px;
   width: 1400px;
   border-radius: 30px;
   background: linear-gradient(135deg, rgba(174, 235, 198, 1) 0%, rgba(111, 227, 158, 0.01) 100%);
@@ -151,7 +191,7 @@ this.fetchRecord()
 }
 
 .check {
-  padding-top: 20px;
+  padding-top: 70px;
   width: 70px;
   font-size: 30px;
   color: rgba(121, 72, 234, 1);
@@ -159,7 +199,7 @@ this.fetchRecord()
 
 main img {
   padding-left: 200px;
-  padding-top: 20px;
+  padding-top: 70px;
 }
 
 body {

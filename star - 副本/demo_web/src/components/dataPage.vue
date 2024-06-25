@@ -41,9 +41,9 @@
 
 <script>
 import axios from "axios";
-
+import myQuestionnaire from "@/components/MyQuestionnaire.vue";
 export default {
-  props: ["close", "id"],
+  props: ["close", "id","userId"],
   data() {
     return {
       theme: null,
@@ -58,13 +58,22 @@ export default {
     this.fetchQuestionnaire()
   },
   methods: {
-    recordOn(question)
+    async recordOn(question)
     {
+      if(!await myQuestionnaire.methods.checkUser(this.userId))
+      {
+        this.close();
+        return;
+      }
       this.questionOn.push(question.questionId)
     },
-    recordOff(question)
+    async recordOff(question)
     {
-
+      if(!await myQuestionnaire.methods.checkUser(this.userId))
+      {
+        this.close();
+        return;
+      }
       let index=this.questionOn.indexOf(question.questionId);
       this.questionOn.splice(index,1);
       console.log(index);
@@ -79,11 +88,15 @@ export default {
       return show;
     },
     async fetchQuestionnaire() {
-
-      const response = axios.get(' http://localhost:8090/getById?id=' + this.id);
+      if(!await myQuestionnaire.methods.checkUser(this.userId))
+      {
+        this.close();
+        return;
+      }
+      const response = axios.get(window.Ip+'/getById?id=' + this.id);
       this.theme = (await response).data.data.theme;
       this.state=(await response).data.data.state;
-      const quesResponse = axios.get(' http://localhost:8090/ListQuestionInIt?id=' + this.id);
+      const quesResponse = axios.get(window.Ip+'/ListQuestionInIt?id=' + this.id);
       this.questions = (await quesResponse).data.data;
       const list = this.questions
       if ((await quesResponse).data.code===400)
@@ -93,13 +106,13 @@ export default {
       }
       else {
         list.forEach(question => {
-          axios.get(' http://localhost:8090/ListAnswerInIt?questionId=' + question.questionId)
+          axios.get(window.Ip+'/ListAnswerInIt?questionId=' + question.questionId)
               .then(response => {
                 this.answerForAll[question.number - 1] = response.data.data;
                 console.log(this.answerForAll)
               })
 
-          axios.get(' http://localhost:8090/ListSelectionInIt?questionId=' + question.questionId)
+          axios.get(window.Ip+'/ListSelectionInIt?questionId=' + question.questionId)
               .then(response => {
 
                 this.selectionForAll[question.number - 1] = response.data.data;

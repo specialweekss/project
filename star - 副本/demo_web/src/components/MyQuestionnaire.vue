@@ -31,9 +31,9 @@
           <p class="bordertext">填写记录</p>
         </button>
 
-      <main>
+      <div class="scrollable-container">
         <div v-for="(value,index) in questionnaires" :key="index">
-          <div class="recordMessage" >
+          <div  class="recordMessage">
             <h3 class="Qname">{{value.theme}}</h3>
             <img src="../assets/img/编辑.png" alt="图片" @click="editOn(value)" />
             <el-button type="text" class="edit" @click="editOn(value)">编辑</el-button>
@@ -65,11 +65,11 @@
           </div>
           <br><br>
         </div>
-      </main>
+      </div>
   </div>
   </div>
-    <o-data v-if="showData" :id="questionnaireId" :close="dataOff" ></o-data>
-    <edit v-if="showEdit" :id="questionnaireId" :creator-id="userId" :close="editOff"></edit>
+    <o-data v-if="showData" :id="questionnaireId" :close="dataOff" :user-id="userId"></o-data>
+    <edit v-if="showEdit" :id="questionnaireId" :user-id="userId" :close="editOff"></edit>
     </div>
 
   <CreateQuestionnaire v-if="showCreate" :user-id="userId" :my="MyOn" :personal-on="PersonalOn" :record-on="RecordOn" :go-home="goHome"></CreateQuestionnaire>
@@ -116,20 +116,45 @@ export default {
     this.fetchQuestionnaire()
   },
   methods: {
+    async checkUser(userId){
+      const response=await axios.get(window.Ip+'/getUserById?userId='+userId);
+      console.log(response)
+      if(response.data.code===400)
+      {
+        alert('账号已不存在！')
+        return false
+      }
+      else
+        return true
+    },
     async getLink(questionnaire){
+      if(!await this.checkUser(this.userId))
+      {
+        this.goHome();
+        return
+      }
       if(await this.deletedByManager(questionnaire.id)===-1)
         return
-      const response=await axios.get('http://localhost:8090/getIp');
+      const response=await axios.get(window.Ip+'/getIp');
       const ip=response.data;
       this.link='http://'+ip+':8080/?questionnaireId='+questionnaire.id;
       console.log(this.link)
       this.showLink=true;
     },
     async linkOff(){
-   
+      if(!await this.checkUser(this.userId))
+      {
+        this.goHome();
+        return
+      }
       this.showLink=false;
     },
     async dataOn(questionnaire){
+      if(!await this.checkUser(this.userId))
+      {
+        this.goHome();
+        return
+      }
       if(await this.deletedByManager(questionnaire.id)===-1)
         return
       this.questionnaireId=questionnaire.id;
@@ -138,22 +163,37 @@ export default {
     },
     async editOn(questionnaire)
     {
+      if(!await this.checkUser(this.userId))
+      {
+        this.goHome();
+        return
+      }
       if(await this.deletedByManager(questionnaire.id)===-1)
         return
       this.showEdit=true;
       this.questionnaireId=questionnaire.id;
       console.log(questionnaire.id);
     },
-    dataOff(){
+    async dataOff(){
+      if(!await this.checkUser(this.userId))
+      {
+        this.goHome();
+        return
+      }
       this.showData=false;
     },
-    editOff(){
+    async editOff(){
+      if(!await this.checkUser(this.userId))
+      {
+        this.goHome();
+        return
+      }
       this.showEdit=false;
-      this.fetchQuestionnaire();
+      await this.fetchQuestionnaire();
     },
     async deletedByManager(id)
     {
-      const update=await axios.get('http://localhost:8090/checkState?id='+id);
+      const update=await axios.get(window.Ip+'/checkState?id='+id);
       console.log(update)
       if(update.data.code===400)
       {
@@ -170,8 +210,13 @@ export default {
       }
     },
     async fetchQuestionnaire(){
+      if(!await this.checkUser(this.userId))
+      {
+        this.goHome();
+        return
+      }
       this.questionnaires=[];
-      const response=await axios.get('http://localhost:8090/ListByUser?userId='+this.userId)
+      const response=await axios.get(window.Ip+'/ListByUser?userId='+this.userId)
       console.log(response)
       const list =response.data.data;
       if(response.data.code===400)
@@ -182,20 +227,30 @@ export default {
         })
     },
     async Delete(questionnaire){
+      if(!await this.checkUser(this.userId))
+      {
+        this.goHome();
+        return
+      }
       if(await this.deletedByManager(questionnaire.id)===-1)
         return
-      const response=await axios.post('http://localhost:8090/delete?id='+questionnaire.id)
+      const response=await axios.post(window.Ip+'/delete?id='+questionnaire.id)
       console.log(response)
       await this.fetchQuestionnaire();
     },
    async OnPublishDialog(questionnaire){
+     if(!await this.checkUser(this.userId))
+     {
+       this.goHome();
+       return
+     }
       console.log(questionnaire.questionNum)
       if(!questionnaire.questionNum)
       {
         alert('问卷问题为空！')
         return
       }
-      const update=await axios.get('http://localhost:8090/checkState?id='+questionnaire.id);
+      const update=await axios.get(window.Ip+'/checkState?id='+questionnaire.id);
       if(update.data.code===200)
       {
         alert('问卷已发布！')
@@ -209,10 +264,20 @@ export default {
       }
       this.publishDialog = true;
     },
-    OffPublishDialog(){
+    async OffPublishDialog(){
+      if(!await this.checkUser(this.userId))
+      {
+        this.goHome();
+        return
+      }
       this.publishDialog = false;
     },
     async publish(questionnaire){
+      if(!await this.checkUser(this.userId))
+      {
+        this.goHome();
+        return
+      }
       if(await this.deletedByManager(questionnaire.id)===-1) {
         this.publishDialog = false;
         return
@@ -233,52 +298,87 @@ export default {
         "endTime":endTime
       }
       console.log(commit)
-      const response=await axios.post('http://localhost:8090/publish?',commit)
+      const response=await axios.post(window.Ip+'/publish?',commit)
       console.log(response)
       this.publishDialog = false;
       await this.fetchQuestionnaire();
     },
     async end(questionnaire){
+      if(!await this.checkUser(this.userId))
+      {
+        this.goHome();
+        return
+      }
       if(await this.deletedByManager(questionnaire.id)===-1)
         return
-      const update=await axios.get('http://localhost:8090/checkState?id='+questionnaire.id);
+      const update=await axios.get(window.Ip+'/checkState?id='+questionnaire.id);
       console.log(update)
       if(update.data.code===400) {
         if (update.data.data === 0) {
           alert('问卷未发布！')
           return;
-        } else {
+        }
+        else  if(update.data.data === -1)
+        {
+          alert('问卷已被系统删除！')
+        }
+        else {
           alert('问卷已截止！')
           return;
         }
       }
-     await axios.post('http://localhost:8090/end?id='+questionnaire.id)
+     await axios.post(window.Ip+'/end?id='+questionnaire.id)
 
       this.endDialog=true;
       await this.fetchQuestionnaire();
     },
-    closeEndDialog(){
+    async closeEndDialog(){
+      if(!await this.checkUser(this.userId))
+      {
+        this.goHome();
+        return
+      }
       this.endDialog=false;
     },
-    CreateOn(){
+   async CreateOn(){
+      if(!await this.checkUser(this.userId))
+      {
+        this.goHome();
+        return
+      }
       this.showMyQuestionnaire=false,
           this.showRecord=false,
           this.showCreate=true,
           this.showPersonal=false
     },
-    PersonalOn(){
+    async PersonalOn(){
+      if(!await this.checkUser(this.userId))
+      {
+        this.goHome();
+        return
+      }
       this.showMyQuestionnaire=false,
           this.showRecord=false,
           this.showCreate=false,
           this.showPersonal=true
     },
-    RecordOn(){
+   async RecordOn(){
+     if(!await this.checkUser(this.userId))
+     {
+       this.goHome();
+       return
+     }
       this.showMyQuestionnaire=false,
           this.showRecord=true,
           this.showCreate=false,
           this.showPersonal=false
     },
    async MyOn(){
+     if(!await this.checkUser(this.userId))
+     {
+       this.goHome();
+       return
+     }
       console.log(1);
       this.showMyQuestionnaire=true;
       this.showRecord=false;
@@ -286,9 +386,6 @@ export default {
           this.showPersonal=false;
       await this.fetchQuestionnaire();
     },
-    handleMyQuestionnaireClick() {
-      console.log("我的问卷被点击");
-    }
   }
 };
 </script>
@@ -301,13 +398,21 @@ export default {
 @import '@/css/buttonHover.css';
 
 .recordMessage {
-  left: 550px;
-  top: -800px;
+  left: 0px;
   width: 1400px;
-  border-radius: 30px;
+  height: 70px;
+  top: 00px;
   background: linear-gradient(135deg, rgba(174, 235, 198, 1) 0%, rgba(111, 227, 158, 0.01) 100%);
+
+}
+.scrollable-container  {
+  left: 540px;
+  height: 1100px;
+  top: -1000px;
+  width: 1400px;
   position: relative;
-  display: flex;
+  max-height: 120vh;
+  overflow-y: auto;
 }
 
 .Qname {

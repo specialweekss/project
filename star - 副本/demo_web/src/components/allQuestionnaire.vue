@@ -25,7 +25,7 @@
           <p class="bordertext">用户列表</p>
         </button>
 
-        <main>
+        <main class="scrollable-container">
           <div v-for="(value,index) in questionnaires" :key="index">
             <div class="recordMessage" >
               <h3 class="Qname">{{value.theme}}</h3>
@@ -39,7 +39,7 @@
         </main>
       </div>
     </div>
-    <o-data v-if="showData" :id="questionnaireId" :close="dataOff" ></o-data>
+    <o-data v-if="showData" :id="questionnaireId" :close="dataOff" :user-id="userId"></o-data>
   </div>
 
   
@@ -54,6 +54,7 @@ import ManagePage from "@/components/managePage.vue";
 import User from "@/components/allUser.vue";
 import axios from "axios";
 import oData from "@/components/dataPage.vue";
+import myQuestionnaire from "@/components/MyQuestionnaire.vue";
 export default {
   props:['userId','goHome'],
   data(){
@@ -75,22 +76,53 @@ export default {
     User,
   },
   mounted() {
+
     this.fetchQuestionnaire()
   },
   methods: {
-    dataOn(questionnaire){
-      this.questionnaireId=questionnaire.id;
-      console.log(questionnaire.id);
-      this.showData=true;
+    async checkQuestionnaire(id) {
+      const update = await axios.get(window.Ip + '/checkState?id=' + id);
+      if (update.data.code === 400) {
+        if (update.data.data === -1) {
+          alert('问卷已被系统删除！')
+          return false
+        }
+        return true
+      }
+      return true
+
     },
-    dataOff(){
-      this.showData=false;
+    async dataOn(questionnaire) {
+      if (!await myQuestionnaire.methods.checkUser(this.userId)) {
+        this.goHome();
+        return;
+      }
+      if(!await this.checkQuestionnaire(questionnaire.id)){
+        await this.fetchQuestionnaire();
+        return
+      }
+      this.questionnaireId = questionnaire.id;
+      console.log(questionnaire.id);
+      this.showData = true;
+    },
+    async dataOff() {
+      if (!await myQuestionnaire.methods.checkUser(this.userId)) {
+        this.goHome();
+        return;
+      }
+      this.showData = false;
     },
 
     async fetchQuestionnaire(){
+      console.log(1)
+      if (!await myQuestionnaire.methods.checkUser(this.userId)) {
+        console.log(2)
+        this.goHome();
+        return;
+      }
       this.questionnaires=[];
       console.log(this.userId)
-      const response=await axios.get('http://localhost:8090/List')
+      const response=await axios.get(window.Ip+'/List')
       console.log(response)
       const list =response.data.data;
       if(response.data.code===400)
@@ -101,27 +133,48 @@ export default {
         })
     },
     async Delete(questionnaire){
-      const response=await axios.post('http://localhost:8090/delete?id='+questionnaire.id)
+      if(!await myQuestionnaire.methods.checkUser(this.userId))
+      {
+        this.goHome();
+        return
+      }
+      if (!await this.checkQuestionnaire(questionnaire.id)) {
+        await this.fetchQuestionnaire();
+        return;
+      }
+      const response=await axios.post(window.Ip+'/delete?id='+questionnaire.id)
       console.log(response)
       await this.fetchQuestionnaire();
     },
 
-    ManageOn(){
-      this.showAllQuestionnaire=false,
-          this.showUser=false,
-          this.showManage=true
+    async ManageOn() {
+      if (!await myQuestionnaire.methods.checkUser(this.userId)) {
+        this.goHome();
+        return;
+      }
+      this.showAllQuestionnaire = false,
+          this.showUser = false,
+          this.showManage = true
     },
-   UserOn(){
-      this.showAllQuestionnaire=false,
-          this.showUser=true,
-          this.showManage=false
-    },
-    QuestionnaireOn(){
+   async UserOn() {
+     if (!await myQuestionnaire.methods.checkUser(this.userId)) {
+       this.goHome();
+       return;
+     }
+     this.showAllQuestionnaire = false,
+         this.showUser = true,
+         this.showManage = false
+   },
+    async QuestionnaireOn() {
+      if (!await myQuestionnaire.methods.checkUser(this.userId)) {
+        this.goHome();
+        return;
+      }
       console.log(1);
-      this.showAllQuestionnaire=true;
-      this.showUser=false
-      this.showManage=false;
-      this.fetchQuestionnaire();
+      this.showAllQuestionnaire = true;
+      this.showUser = false
+      this.showManage = false;
+      await this.fetchQuestionnaire();
     },
   }
 };
@@ -135,15 +188,23 @@ export default {
 @import '@/css/buttonHover.css';
 
 .recordMessage {
-  left: 550px;
-  top: -700px;
+  left: 0px;
+  top:  0px;
   width: 1400px;
   border-radius: 30px;
   background: linear-gradient(135deg, rgba(174, 235, 198, 1) 0%, rgba(111, 227, 158, 0.01) 100%);
   position: relative;
   display: flex;
 }
-
+.scrollable-container  {
+  left: 540px;
+  height: 1100px;
+  top: -750px;
+  width: 1400px;
+  position: relative;
+  max-height: 120vh;
+  overflow-y: auto;
+}
 .Qname {
   padding-left: 200px;
   padding-top: 10px;

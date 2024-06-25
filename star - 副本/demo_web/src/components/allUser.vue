@@ -22,7 +22,7 @@
           <p class="bordertext">用户列表</p>
         </div>
 
-        <main>
+        <main class="scrollable-container">
           <div v-for="(value,index) in users" :key="index">
             <div class="recordMessage" >
               <h3 class="Qname">用户id：{{value.userId}} <br> 用户名：{{value.name}}   <br>用户类型：{{getUserType(value.type)}}</h3>
@@ -55,6 +55,20 @@ export default {
     this.fetchQuestionnaire()
   },
   methods: {
+    async checkUser(userId){
+      const response=await axios.get(window.Ip+'/getUserById?userId='+userId);
+      console.log(response)
+      if(response.data.code===400)
+      {
+        if(userId!==this.userId)
+        alert('用户账号已不存在！')
+        else 
+          alert('管理员账号已不存在！')
+        return false
+      }
+      else
+        return true
+    },
     getUserType(type){
       const types={
         '0':'普通用户',
@@ -64,9 +78,14 @@ export default {
     },
 
     async fetchQuestionnaire(){
+      if(!await this.checkUser(this.userId))
+      {
+        this.goHome();
+        return;
+      }
       this.users=[];
       console.log(this.userId)
-      const response=await axios.get('http://localhost:8090/UserList')
+      const response=await axios.get(window.Ip+'/UserList')
       console.log(response)
       const list =response.data.data;
       if(response.data.code===400)
@@ -85,7 +104,12 @@ export default {
         })
     },
     async Delete(user){
-      const response=await axios.post('http://localhost:8090/DeleteUser?userId='+user.userId)
+      if(!await this.checkUser(user.userId))
+      {
+        await this.fetchQuestionnaire();
+        return;
+      }
+      const response=await axios.post(window.Ip+'/DeleteUser?userId='+user.userId)
       console.log(response)
       await this.fetchQuestionnaire();
     },
@@ -102,15 +126,23 @@ export default {
 @import '@/css/buttonHover.css';
 
 .recordMessage {
-  left: 550px;
-  top: -700px;
+  left: 0px;
+  top: 00px;
   width: 1400px;
   border-radius: 30px;
   background: linear-gradient(135deg, rgba(174, 235, 198, 1) 0%, rgba(111, 227, 158, 0.01) 100%);
   position: relative;
   display: flex;
 }
-
+.scrollable-container  {
+  left: 540px;
+  height: 1100px;
+  top: -750px;
+  width: 1400px;
+  position: relative;
+  max-height: 120vh;
+  overflow-y: auto;
+}
 .Qname {
   padding-left: 50px;
   padding-top: 10px;

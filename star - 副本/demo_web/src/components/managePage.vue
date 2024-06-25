@@ -36,9 +36,9 @@
 
 <script>
 import axios from "axios";
-
+import myQuestionnaire from "@/components/MyQuestionnaire.vue";
 export default {
-  props:['userOn','questionnaire','goHome','userId'],
+  props:['questionnaire','userOn','goHome','userId'],
   data() {
     return {
       name: '',
@@ -51,18 +51,52 @@ export default {
   },
   methods: {
     async fetchUser(){
-      const response=await axios.get('http://localhost:8090/getUserById?userId='+this.userId)
+      if(!await myQuestionnaire.methods.checkUser(this.userId))
+      {
+        this.goHome();
+        return;
+      }
+      const response=await axios.get(window.Ip+'/getUserById?userId='+this.userId)
       this.user=response.data.data;
       this.name=response.data.data.name;
       this.password=response.data.data.password;
     },
     async saveData() {
-      const response=await  axios.post('http://localhost:8090/ModUser?newName='+this.name+'&newPassword='+this.password+'&userId='+this.userId)
+      if(!await myQuestionnaire.methods.checkUser(this.userId))
+      {
+        this.goHome();
+        return;
+      }
+      const response=await  axios.post(window.Ip+'/ModUser?userName='+this.name+'&password='+this.password+'&userId='+this.userId)
       console.log(response);
+      if(response.data.code===400)
+      {
+        if(response.data.data===-1)
+        {
+          alert('请将昵称和密码填写完毕！')
+          return
+        }
+        else if(response.data.data===1)
+        {
+
+          alert('重复昵称!')
+          return
+        }
+        else
+        {
+          alert('密码不合规！应同时包含大小写字母和数字！')
+          return
+        }
+      }
       await this.fetchUser();
     },
     async logout() {
-      const response=await  axios.post('http://localhost:8090/logOut?userId='+this.userId)
+      if(!await myQuestionnaire.methods.checkUser(this.userId))
+      {
+        this.goHome();
+        return;
+      }
+      const response=await  axios.post(window.Ip+'/logOut?userId='+this.userId)
       console.log(response);
       this.goHome()
     }
@@ -131,14 +165,15 @@ export default {
   vertical-align: top;
 }
 .b1{
+  left: 0%;
   background: rgba(84, 170, 199, 1);
 }
 .b2{
-  left:100px;
+  left:6%;
   background: rgba(199, 84, 85, 1);
 }
 .b3{
-  left:200px;
+  left:12%;
   background: rgba(199, 84, 199, 1);
 }
 body{
