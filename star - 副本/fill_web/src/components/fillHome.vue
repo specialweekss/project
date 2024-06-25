@@ -56,7 +56,7 @@ export default {
       this.questionnaireId = urlParams.get('questionnaireId');
       if(this.questionnaireId)
       {
-        const response =await axios.get('http://localhost:8090/getById?id='+this.questionnaireId)
+        const response =await axios.get(window.Ip+'/getById?id='+this.questionnaireId)
         if(response.data.code===200)
         {
           this.state=response.data.data.state
@@ -91,14 +91,14 @@ export default {
         alert('账号格式错误，应为账号id！')
         return;
       }
-      const response=await axios.get('http://localhost:8090/LogIn?password='+this.password+'&userId='+this.userId)
+      const response=await axios.get(window.Ip+'/LogIn?password='+this.password+'&userId='+this.userId)
       this.type=response.data.data.type
       console.log(response);
       if(response.data.code===400){ alert('账号或密码错误！');}
       else
       {
         if(this.questionnaireId!==null) {
-          const update = await axios.get('http://localhost:8090/checkState?id=' + this.questionnaireId);
+          const update = await axios.get(window.Ip+'/checkState?id=' + this.questionnaireId);
 
           if(update.data.code===200)
           {

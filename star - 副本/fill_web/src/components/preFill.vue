@@ -37,8 +37,8 @@ export default {
         alert('问卷id格式错误！')
         return
       }
-      const state=(await axios.get('http://localhost:8090/checkState?id=' + this.id)).data.data
-      if(state===0)
+      const state=(await axios.get(window.Ip+'/checkState?id=' + this.id)).data.data
+      if(state===(0||-1))
       {
         alert('问卷不存在或尚未发布！')
         return

@@ -95,8 +95,11 @@ public class RecordController {
     }
     @CrossOrigin
     @PostMapping("/deleteRecord")
-    public Result deleteRecord(int recordId) {
-       Record record= recordService.getById(recordId);
+    public Result deleteRecord(int questionnaireId, int userId) {
+        LambdaQueryWrapper<Record> wrapper=new LambdaQueryWrapper<>();
+        wrapper.eq(Record::getQuestionnaireId, questionnaireId).eq(Record::getUserId, userId);
+       List<Record> records=recordService.list(wrapper);
+       Record record=records.get(0);
        record.setIsDeleted(1);
        if(recordService.updateById(record))
            return Result.success(record);

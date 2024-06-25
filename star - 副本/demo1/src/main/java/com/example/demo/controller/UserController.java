@@ -1,14 +1,16 @@
 package com.example.demo.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.example.demo.Class.Questionnaire;
 import com.example.demo.Class.User;
 import com.example.demo.other.Result;
 import com.example.demo.service.LogService;
+import com.example.demo.service.QuestionService;
 import lombok.extern.java.Log;
 import org.apache.ibatis.jdbc.Null;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
+import com.example.demo.service.QuestionnaireService;
 import java.util.List;
 import java.util.Objects;
 
@@ -17,6 +19,10 @@ public class UserController {
 
     @Autowired
     private LogService logservice;
+    @Autowired
+    private QuestionnaireService questionnaireService;
+    @Autowired
+    private Controller controller;
     @CrossOrigin
     @GetMapping("/UserList")
     public Result UserList()
@@ -27,6 +33,10 @@ public class UserController {
     @PostMapping("/Register")
     public Result Register(String username,String password)
     {
+        if(username.isEmpty() || password.isEmpty()||username.isBlank()||password.isBlank())
+        {
+            return Result.fail(-1,"昵称密码为空");
+        }
         if(registercheck(username, password))
         {
             if (namecheck(username))
@@ -59,61 +69,64 @@ public class UserController {
     @GetMapping("/getUserById")
     public Result getUserById(int userId)
     {
-        return Result.success(logservice.getById(userId));
-    }
-    @CrossOrigin
-    @PostMapping("/ModUser")//修改密码或名称
-    public Result ModPassword(int userId,String newName,String newPassword)
-    {
-
-          //  if(registercheck(newName,newPassword))
-           // {
-                User user = logservice.getById(userId);
-                user.setPassword(newPassword);
-                user.setName(newName);
-                logservice.updateById(user);
-                return Result.success(userId);
-           // }
-            //else return Result.fail(0,"密码账号不合规");
+        User user = logservice.getById(userId);
+        if (user != null)
+            return Result.success(user);
+        else
+            return Result.fail();
     }
 
     @CrossOrigin
     @PostMapping("/logOut")//注销
     public Result Logout(int userId)//,String password,int type)
     {
-        //if (idcheck(userId,password,type))
-        //{
-          return DeleteUser(userId);
-       // }
-        //else     return Result.fail(2,"密码或账号错误");
+        return DeleteUser(userId);
     }
 
-   //登出时不需向后端传参，因此交由前端处理
    @CrossOrigin
     @PostMapping("/DeleteUser")//删除
     public Result DeleteUser(int userId)
     {
       if(logservice.removeById(userId))
-        return Result.success();
+      {
+          deleteQuestionnaireOfUser(userId);
+          return Result.success();
+      }
       else return Result.fail(3,"删除失败");
     }
 
-    @CrossOrigin
-    @GetMapping("/ModUser")//修改密码或名称
-    public Result ModPassword(int userId,String userName,String password,int type)
-    {
-        if (idcheck(userId,password))
+    public void deleteQuestionnaireOfUser(int creatorId) {
+        LambdaQueryWrapper<Questionnaire> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Questionnaire::getCreatorId,creatorId);
+        List<Questionnaire> list = questionnaireService.list(wrapper);
+        if(!list.isEmpty())
         {
-            if(registercheck(userName,password))
-            {
-                User user = logservice.getById(userId);
-                user.setPassword(password);
-                user.setName(userName);
-                return Result.success(userId);
-            }
-           else return Result.fail(0,"密码账号不合规");
+            list.forEach(questionnaire -> {
+                controller.delete(questionnaire.getId());
+            });
         }
-        else     return Result.fail(2,"密码或账号错误");
+    }
+
+    @CrossOrigin
+    @PostMapping("/ModUser")//修改密码或名称
+    public Result ModPassword(int userId,String userName,String password)
+    {
+        if(userName.isEmpty()||password.isEmpty()||userName.isBlank()||password.isBlank())
+          return Result.fail(-1,"填写未完成");;
+
+                if (registercheck(userName, password)) {
+                    User user = logservice.getById(userId);
+                    if(user.getName().equals(userName)||namecheck(userName)) {
+                        user.setPassword(password);
+                        user.setName(userName);
+                        logservice.updateById(user);
+                        return Result.success(userId);
+                    }
+                     else {
+                            return Result.fail(1, "昵称重复！");
+                    }
+                } else return Result.fail(0, "密码账号不合规");
+
     }
 
     public boolean registercheck(String name,String password)//仅检查命名规则

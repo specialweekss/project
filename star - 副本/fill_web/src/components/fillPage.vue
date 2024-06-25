@@ -55,14 +55,14 @@ export default {
   },
   methods: {
     async fetchQuestionnaire() {
-      const response = axios.get('http://localhost:8090/getById?id=' + this.id);
+      const response = axios.get(window.Ip+'/getById?id=' + this.id);
       this.theme = (await response).data.data.theme;
-      const quesResponse = axios.get('http://localhost:8090/ListQuestionInIt?id=' + this.id);
+      const quesResponse = axios.get(window.Ip+'/ListQuestionInIt?id=' + this.id);
       this.questions = (await quesResponse).data.data;
       this.questionNUm=(await quesResponse).data.total;
       const list=this.questions
       list.forEach(question => {
-        axios.get('http://localhost:8090/ListSelectionInIt?questionId=' + question.questionId)
+        axios.get(window.Ip+'/ListSelectionInIt?questionId=' + question.questionId)
             .then(response => {
 
               this.selectionForAll[question.number - 1] = response.data.data;
@@ -98,7 +98,7 @@ export default {
       return over;
     },
     async commit(){
-      const update=await axios.get('http://localhost:8090/checkState?id='+this.id);
+      const update=await axios.get(window.Ip+'/checkState?id='+this.id);
       console.log(update)
       if(update.data.code===400)
       {
@@ -130,7 +130,7 @@ export default {
              })
            }
          }
-      const  response=await axios.post('http://localhost:8090/commit?id='+this.id+"&userId="+this.userId,this.commits);
+      const  response=await axios.post(window.Ip+'/commit?id='+this.id+"&userId="+this.userId,this.commits);
       console.log(response);
       this.close()
     },
