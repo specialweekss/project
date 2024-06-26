@@ -189,7 +189,7 @@ export default {
 
 .recordMessage {
   left: 0px;
-  top:  0px;
+  top: 0px;
   width: 1400px;
   border-radius: 30px;
   background: linear-gradient(135deg, rgba(174, 235, 198, 1) 0%, rgba(111, 227, 158, 0.01) 100%);

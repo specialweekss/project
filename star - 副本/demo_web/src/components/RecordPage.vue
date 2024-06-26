@@ -39,8 +39,8 @@
         问卷名：{{value.theme}}<br>
           填写日期：{{value.recordTime}}
         </div>
-        <img src="../assets/img/删除.png" alt="图片" @click="Delete(value.questionnaireId)" />
-        <div class="check" @click="Delete(value.questionnaireId)">删除</div>
+        <img src="../assets/img/删除.png" alt="图片" @click="Delete(value)" />
+        <div class="check" @click="Delete(value)">删除</div>
         <img src="@/assets/img/查看.png" alt="图片" @click="recordOn(value.questionnaireId)" />
         <div class="check" @click="recordOn(value.questionnaireId)">查看</div>
       </div>
@@ -74,17 +74,17 @@ export default {
 this.fetchRecord()
   },
   methods: {
-    async Delete(questionnaireId){
+    async Delete(record){
       if(!await myQuestionnaire.methods.checkUser(this.userId))
       {
         this.goHome();
         return;
       }
-      if(await this.deletedByManager(questionnaireId)===-1)
-        return;
-      const response=await axios.post('http://localhost:8090/deleteRecord?userId='+this.userId+'&questionnaireId='+questionnaireId);
+
+      const response=await axios.post('http://localhost:8090/deleteRecord?recordId='+record.recordId);
       console.log(response);
-      alert('记录已删除')
+      await this.fetchRecord()
+
     },
     async fetchRecord(){
       if(!await myQuestionnaire.methods.checkUser(this.userId))
@@ -134,8 +134,10 @@ this.fetchRecord()
         this.goHome();
         return;
       }
-      if(await this.deletedByManager(questionnaireId)===-1)
+      if(await this.deletedByManager(questionnaireId)===-1) {
+
         return
+      }
       const response=await axios.get(window.Ip+'/getById?id='+questionnaireId)
       console.log(response.data.data)
        if(response.data.data.questionNum===0)
