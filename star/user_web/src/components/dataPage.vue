@@ -28,6 +28,7 @@
             <div v-else>
               用户{{value.userId}}：{{value.answer}}
             </div>
+            <div v-if="!isValid(value)" style="color: red" >(已失效)</div>
           </div>
           <el-button  type="primary" @click="recordOff(question)">收回</el-button>
         </div>

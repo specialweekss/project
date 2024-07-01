@@ -11,7 +11,7 @@
  Target Server Version : 80037
  File Encoding         : 65001
 
- Date: 21/06/2024 21:18:20
+ Date: 27/06/2024 18:44:12
 */
 
 SET NAMES utf8mb4;
@@ -29,7 +29,7 @@ CREATE TABLE `answer`  (
   `answer` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '答案，单选多选用字符串储存',
   `is_valid` int NOT NULL DEFAULT 1 COMMENT '是否有效（问题修改后无效），1有效，0无效',
   PRIMARY KEY (`answer_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 157 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 207 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of answer
@@ -51,6 +51,19 @@ INSERT INTO `answer` VALUES (194, 139, 110, 0, '1', 0);
 INSERT INTO `answer` VALUES (195, 138, 110, 2, '1', 0);
 INSERT INTO `answer` VALUES (196, 139, 110, 0, '2', 0);
 INSERT INTO `answer` VALUES (197, 140, 110, 1, '12', 0);
+INSERT INTO `answer` VALUES (198, 146, 126, 0, '1', 0);
+INSERT INTO `answer` VALUES (199, 146, 127, 0, '2', 0);
+INSERT INTO `answer` VALUES (200, 147, 128, 0, '2', 0);
+INSERT INTO `answer` VALUES (201, 157, 138, 0, '2', 0);
+INSERT INTO `answer` VALUES (202, 157, 136, 0, '2', 0);
+INSERT INTO `answer` VALUES (203, 158, 147, 0, '2', 0);
+INSERT INTO `answer` VALUES (204, 159, 147, 0, '2', 0);
+INSERT INTO `answer` VALUES (205, 163, 147, 0, '2', 0);
+INSERT INTO `answer` VALUES (206, 167, 157, 0, '1', 1);
+INSERT INTO `answer` VALUES (207, 168, 157, 2, '1', 1);
+INSERT INTO `answer` VALUES (208, 171, 163, 1, '12', 0);
+INSERT INTO `answer` VALUES (209, 172, 163, 2, '1', 0);
+INSERT INTO `answer` VALUES (210, 173, 163, 3, '空', 0);
 
 -- ----------------------------
 -- Table structure for question
@@ -66,11 +79,14 @@ CREATE TABLE `question`  (
   `answer_num` int NOT NULL DEFAULT 0 COMMENT '答案数量',
   `selection_num` int NOT NULL DEFAULT 0 COMMENT '选项数量，填空打分题无需填入，默认0',
   PRIMARY KEY (`question_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 83 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 168 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of question
 -- ----------------------------
+INSERT INTO `question` VALUES (167, 1, '问题', 0, 0, 327, 1, 3);
+INSERT INTO `question` VALUES (168, 2, '问题标题', 0, 2, 327, 1, 0);
+INSERT INTO `question` VALUES (175, 1, '问题标题', 0, 0, 331, 0, 2);
 
 -- ----------------------------
 -- Table structure for questionnaire
@@ -86,11 +102,13 @@ CREATE TABLE `questionnaire`  (
   `question_num` int NOT NULL DEFAULT 0 COMMENT '问题数',
   `commit_num` int NOT NULL DEFAULT 0 COMMENT '填写的问卷数量',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 242 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 328 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of questionnaire
 -- ----------------------------
+INSERT INTO `questionnaire` VALUES (327, 'nih', 157, 1, '2024-06-26 11:40:41', '2024-06-27 00:00:00', 2, 1);
+INSERT INTO `questionnaire` VALUES (331, '你好', 165, 1, '2024-06-27 18:37:00', '2024-06-29 00:00:00', 1, 0);
 
 -- ----------------------------
 -- Table structure for record
@@ -104,24 +122,16 @@ CREATE TABLE `record`  (
   `is_deleted` int NOT NULL DEFAULT 0 COMMENT '（废弃字段）是否被用户删除，0否1是，但记录依然存在（可被创建者/管理员查看）',
   `theme` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '问卷标题',
   PRIMARY KEY (`record_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 45 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 86 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of record
 -- ----------------------------
-INSERT INTO `record` VALUES (57, 110, 264, '2024-06-21 16:57:29', 0, NULL);
-INSERT INTO `record` VALUES (58, 110, 264, '2024-06-21 16:57:33', 0, NULL);
-INSERT INTO `record` VALUES (59, 110, 264, '2024-06-21 17:23:53', 0, '你好');
-INSERT INTO `record` VALUES (60, 110, 264, '2024-06-21 17:23:56', 0, '你好');
-INSERT INTO `record` VALUES (61, 110, 264, '2024-06-21 17:39:37', 0, '你好');
-INSERT INTO `record` VALUES (62, 110, 264, '2024-06-21 17:39:39', 0, '你好');
-INSERT INTO `record` VALUES (63, 110, 264, '2024-06-21 17:40:48', 0, '你好');
-INSERT INTO `record` VALUES (64, 110, 264, '2024-06-21 17:40:50', 0, '你好');
-INSERT INTO `record` VALUES (65, 110, 264, '2024-06-21 17:48:27', 0, '你好');
-INSERT INTO `record` VALUES (66, 110, 264, '2024-06-21 17:52:43', 0, '你好');
-INSERT INTO `record` VALUES (67, 110, 264, '2024-06-21 17:53:36', 0, '你好');
-INSERT INTO `record` VALUES (68, 110, 264, '2024-06-21 17:53:40', 0, '你好');
-INSERT INTO `record` VALUES (69, 110, 264, '2024-06-21 17:54:07', 0, '你好');
+INSERT INTO `record` VALUES (83, 147, 323, '2024-06-26 10:31:10', 1, '你好');
+INSERT INTO `record` VALUES (84, 147, 323, '2024-06-26 10:31:59', 1, '你好');
+INSERT INTO `record` VALUES (85, 147, 324, '2024-06-26 10:37:55', 1, '你好');
+INSERT INTO `record` VALUES (86, 157, 327, '2024-06-26 11:41:32', 0, 'nih');
+INSERT INTO `record` VALUES (87, 163, 329, '2024-06-27 17:33:44', 1, '问卷');
 
 -- ----------------------------
 -- Table structure for selection
@@ -133,11 +143,16 @@ CREATE TABLE `selection`  (
   `position` int NOT NULL DEFAULT 1 COMMENT '选项编号，1表示A,2表示B等等',
   `content` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '选项文本',
   PRIMARY KEY (`selection_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 89 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 270 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of selection
 -- ----------------------------
+INSERT INTO `selection` VALUES (268, 167, 1, '选项');
+INSERT INTO `selection` VALUES (269, 167, 2, '选项');
+INSERT INTO `selection` VALUES (270, 167, 3, '选项');
+INSERT INTO `selection` VALUES (280, 175, 1, '选项');
+INSERT INTO `selection` VALUES (281, 175, 2, '选项');
 
 -- ----------------------------
 -- Table structure for user
@@ -149,14 +164,25 @@ CREATE TABLE `user`  (
   `type` int NULL DEFAULT NULL COMMENT '用户类型，0普通用户，1管理员',
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '用户密码',
   PRIMARY KEY (`user_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 112 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 163 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of user
 -- ----------------------------
-INSERT INTO `user` VALUES (102, '管理员', 1, '111');
-INSERT INTO `user` VALUES (110, '11', 0, 'aD123');
-INSERT INTO `user` VALUES (112, '111', 0, 'aD123');
-INSERT INTO `user` VALUES (113, '1111111', 0, 'aD123');
+INSERT INTO `user` VALUES (102, '管理员', 1, 'aD123');
+INSERT INTO `user` VALUES (103, '管理', 1, '111');
+INSERT INTO `user` VALUES (147, '145', 0, 'aD123');
+INSERT INTO `user` VALUES (151, '110', 0, 'aD123');
+INSERT INTO `user` VALUES (152, '147', 0, 'aD123');
+INSERT INTO `user` VALUES (153, '1471', 0, 'aD123');
+INSERT INTO `user` VALUES (154, '14711', 0, 'aD123');
+INSERT INTO `user` VALUES (155, '1472', 0, 'aD123');
+INSERT INTO `user` VALUES (156, '1111', 0, 'aD123');
+INSERT INTO `user` VALUES (157, 'nih ', 0, 'aD12');
+INSERT INTO `user` VALUES (158, '666', 0, 'Lin777');
+INSERT INTO `user` VALUES (159, '你好', 0, 'L4d2');
+INSERT INTO `user` VALUES (161, 'a', 0, 'aD123');
+INSERT INTO `user` VALUES (162, '1', 0, 'aD123');
+INSERT INTO `user` VALUES (165, '111', 0, 'aD123');
 
 SET FOREIGN_KEY_CHECKS = 1;
